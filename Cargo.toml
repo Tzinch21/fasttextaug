@@ -1,0 +1,12 @@
+[package]
+name = "fasttextaug"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+serde_json = "1.0.96"
+
+[dependencies.pyo3]
+version = "0.18.0"
+features = ["abi3-py38"]
