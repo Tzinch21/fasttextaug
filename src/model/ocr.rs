@@ -40,9 +40,9 @@ impl OcrModel {
 }
 
 impl Model for OcrModel {
-    fn from_json(path: &std::path::Path) -> Self {
+    fn from_json(model_path: &std::path::Path) -> Self {
         let mut mapping_from_file =
-            utils::read_mapping(path, Some(100), Some(10)).unwrap();
+            utils::read_mapping(model_path, Some(100), Some(10)).unwrap();
         Self::reverse_mapping(&mut mapping_from_file);
         OcrModel { model: mapping_from_file }
     }
