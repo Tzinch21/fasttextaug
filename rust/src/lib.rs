@@ -6,8 +6,8 @@ use model::Model;
 use pyo3::prelude::*;
 
 #[pyfunction]
-fn get_predict_from_model(feature: String) -> String {
-    let file_path = Path::new("res/ru.json");
+fn get_predict_from_ocr_model(feature: String, filepath: String) -> String {
+    let file_path = Path::new(&filepath);
     let ocr_model = model::OcrModel::from_json(&file_path);
     let predict = ocr_model.predict(&feature);
     if let Some(vec) = predict {
@@ -18,7 +18,7 @@ fn get_predict_from_model(feature: String) -> String {
 }
 
 #[pymodule]
-fn fasttextaug(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(get_predict_from_model, m)?)?;
+fn rust_fasttextaug(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(get_predict_from_ocr_model, m)?)?;
     Ok(())
 }

@@ -44,7 +44,7 @@ mod tests {
 
     #[test]
     fn read_good_mapping() {
-        let good_mapping_path = Path::new("res/test/good_mapping.json");
+        let good_mapping_path = Path::new("res_test/good_mapping.json");
         let readed_mapping: Mapping =
             read_mapping(&good_mapping_path, None, None).unwrap();
 
@@ -60,7 +60,7 @@ mod tests {
 
     #[test]
     fn read_wrong_val_mapping() {
-        let wrong_val_mapping_path = Path::new("res/test/wrong_val_mapping.json");
+        let wrong_val_mapping_path = Path::new("res_test/wrong_val_mapping.json");
         let readed_mapping: Mapping =
             read_mapping(&wrong_val_mapping_path, None, None).unwrap();
         let expected_mapping = HashMap::from([
@@ -75,7 +75,7 @@ mod tests {
 
     #[test]
     fn read_not_json_mapping() {
-        let not_json_path = Path::new("res/test/not_json.txt");
+        let not_json_path = Path::new("res_test/not_json.txt");
         let readed_result: Result<Mapping, Box<dyn Error>> =
             read_mapping(&not_json_path, None, None);
         let err = readed_result.unwrap_err().downcast::<serde_json::Error>().unwrap();
@@ -84,7 +84,7 @@ mod tests {
 
     #[test]
     fn read_not_exist_mapping() {
-        let not_exist_path = Path::new("res/test/not_exist.json");
+        let not_exist_path = Path::new("res_test/not_exist.json");
         let readed_result: Result<Mapping, Box<dyn Error>> =
             read_mapping(&not_exist_path, None, None);
         let err = readed_result.unwrap_err().downcast::<io::Error>().unwrap();

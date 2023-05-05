@@ -1,5 +1,6 @@
-/target
-/Cargo.lock
 .venv/
 notebooks/
-.vscode
+.vscode/
+__pycache__
+rust/target
+python/fasttextaug/*.abi3.so
