@@ -1,9 +1,9 @@
 pub mod model;
 pub mod utils;
 
-use std::path::Path;
 use model::Model;
 use pyo3::prelude::*;
+use std::path::Path;
 
 #[pyfunction]
 fn get_predict_from_ocr_model(feature: String, filepath: String) -> String {
@@ -12,7 +12,7 @@ fn get_predict_from_ocr_model(feature: String, filepath: String) -> String {
     let predict = ocr_model.predict(&feature);
     if let Some(vec) = predict {
         let result = vec.iter().next().unwrap();
-        return result.clone()
+        return result.clone();
     }
     String::from("Not found")
 }

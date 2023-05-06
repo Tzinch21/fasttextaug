@@ -1,5 +1,5 @@
-use std::path::Path;
 use std::collections::HashMap;
+use std::path::Path;
 
 pub type Mapping = HashMap<String, Vec<String>>;
 

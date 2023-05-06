@@ -1,0 +1,26 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.2.0
+  hooks:
+  - id: check-json
+  - id: check-toml
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: pretty-format-json
+    args: [--autofix, --no-ensure-ascii]
+  - id: trailing-whitespace
+- repo: https://github.com/psf/black
+  rev: 23.3.0
+  hooks:
+  - id: black
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
+  hooks:
+  - id: isort
+- repo: https://github.com/doublify/pre-commit-rust
+  rev: master
+  hooks:
+  - id: fmt
+    args: ['--manifest-path=rust/Cargo.toml', '--']
+  - id: cargo-check
+    args: ['--manifest-path=rust/Cargo.toml']
