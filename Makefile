@@ -6,3 +6,5 @@ reinstall:
 	pip install rust/target/wheels/$(WHEEL)
 test:
 	cargo test --manifest-path rust/Cargo.toml
+format:
+	cargo fmt --manifest-path rust/Cargo.toml
