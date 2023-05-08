@@ -1,7 +1,9 @@
+// pub mod aug;
+pub mod doc;
 pub mod model;
 pub mod utils;
 
-use model::{KeyboardModel, Mapping, Model, OcrModel};
+use model::{BaseModel, KeyboardModel, Mapping, OcrModel};
 use pyo3::prelude::*;
 
 #[pyfunction]

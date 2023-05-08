@@ -1,5 +1,5 @@
-use super::super::utils;
-use super::base::{Mapping, Model};
+use super::base::{BaseModel, Mapping};
+use crate::utils;
 use std::path::Path;
 
 pub struct OcrModel {
@@ -10,7 +10,7 @@ pub struct OcrModel {
 impl OcrModel {
     /// This function useful because if 'l' looks like '1', so '1' looks like 'l'
     fn reverse_mapping(mapping: &mut Mapping) {
-        let mut pairs_to_insert: Vec<(String, String)> = Vec::with_capacity(mapping.capacity() * 2);
+        let mut pairs_to_insert = Vec::with_capacity(mapping.capacity() * 2);
         for (key, vec_value) in mapping.iter() {
             for value in vec_value {
                 let is_in_hash = mapping.get(value);
@@ -27,11 +27,11 @@ impl OcrModel {
             }
         }
 
-        for (new_key, new_value) in pairs_to_insert {
+        for (new_key, new_value) in pairs_to_insert.into_iter() {
             if let Some(vec_of_val) = mapping.get_mut(&new_key) {
                 vec_of_val.push(new_value)
             } else {
-                let mut new_vec_of_val: Vec<String> = Vec::with_capacity(10);
+                let mut new_vec_of_val = Vec::with_capacity(10);
                 new_vec_of_val.push(new_value);
                 mapping.insert(new_key.clone(), new_vec_of_val);
             }
@@ -66,7 +66,7 @@ impl OcrModel {
     }
 }
 
-impl Model for OcrModel {
+impl BaseModel for OcrModel {
     fn get_model(&self) -> Option<&Mapping> {
         if let Some(model) = &self.model {
             return Some(model);
@@ -77,18 +77,10 @@ impl Model for OcrModel {
 
 #[cfg(test)]
 mod tests {
-    use super::super::super::utils::{transform_to_set, MappingSet};
     use super::*;
+    use crate::utils::transform_to_set;
     use std::collections::HashMap;
     use std::collections::HashSet;
-
-    #[test]
-    fn test_empty_transform_to_set() {
-        let input_mapping: HashMap<String, Vec<String>> = HashMap::new();
-        let mapping_set: MappingSet = transform_to_set(&input_mapping);
-        let expected_result: MappingSet = HashMap::new();
-        assert_eq!(mapping_set, expected_result);
-    }
 
     #[test]
     fn test_reverse() {
@@ -114,7 +106,7 @@ mod tests {
             (String::from("C"), HashSet::from([String::from("x")])),
             (
                 String::from("x"),
-                HashSet::from([String::from("C"), String::from("A")]),
+                HashSet::from([String::from("A"), String::from("C")]),
             ),
             (String::from("y"), HashSet::from([String::from("A")])),
             (String::from("b"), HashSet::from([String::from("B")])),
@@ -148,24 +140,24 @@ mod tests {
             ),
             (
                 String::from("B"),
-                vec![String::from("b"), String::from("f")],
+                vec![String::from("b"), String::from("ю")],
             ),
-            (String::from("C"), vec![String::from("b")]),
+            (String::from("Ж"), vec![String::from("b")]),
         ]);
         let mut ocr_model = OcrModel::new_from_mapping(mapping);
         let expected = HashMap::from([
             (String::from("A"), vec![String::from("a")]),
             (
                 String::from("B"),
-                vec![String::from("b"), String::from("f")],
+                vec![String::from("b"), String::from("ю")],
             ),
-            (String::from("C"), vec![String::from("b")]),
+            (String::from("Ж"), vec![String::from("b")]),
             (String::from("a"), vec![String::from("A")]),
             (
                 String::from("b"),
-                vec![String::from("B"), String::from("C")],
+                vec![String::from("B"), String::from("Ж")],
             ),
-            (String::from("f"), vec![String::from("B")]),
+            (String::from("ю"), vec![String::from("B")]),
         ]);
         let obs_set = transform_to_set(&ocr_model.get_model().unwrap());
         let exp_set = transform_to_set(&expected);

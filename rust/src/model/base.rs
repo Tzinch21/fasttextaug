@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 pub type Mapping = HashMap<String, Vec<String>>;
 
-pub trait Model {
+pub trait BaseModel {
     fn get_model(&self) -> Option<&Mapping>;
 
     /// Get model stats (len, capacity, Vec<len, capacity> for each array)
@@ -17,6 +17,13 @@ pub trait Model {
             }
             None => (0, 0, vec![]),
         }
+    }
+
+    fn key_exists(&self, data: &str) -> bool {
+        if let Some(model) = self.get_model() {
+            return model.contains_key(data);
+        }
+        false
     }
 
     fn predict(&self, data: &str) -> Option<&Vec<String>> {
@@ -46,7 +53,7 @@ mod tests {
     struct MockModel {
         model: Option<Mapping>,
     }
-    impl Model for MockModel {
+    impl BaseModel for MockModel {
         fn get_model(&self) -> Option<&Mapping> {
             if let Some(model) = &self.model {
                 return Some(model);

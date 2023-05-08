@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use super::super::utils;
-use super::{base::Mapping, Model};
+use super::{BaseModel, Mapping};
+use crate::utils;
 
 pub struct KeyboardModel {
     allow_special_char: bool,
@@ -77,7 +77,7 @@ impl KeyboardModel {
     }
 }
 
-impl Model for KeyboardModel {
+impl BaseModel for KeyboardModel {
     fn get_model(&self) -> Option<&Mapping> {
         if let Some(model) = &self.model {
             return Some(model);

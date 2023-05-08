@@ -5,7 +5,7 @@ use std::path::Path;
 
 use serde_json::{Map, Value};
 
-use super::model::Mapping;
+use crate::model::Mapping;
 
 /// Read json from path and put in HashMap
 /// Expected json format String -> Vec<String>
@@ -128,5 +128,13 @@ mod tests {
             ),
         ]);
         assert_eq!(mapping_set, expected_result)
+    }
+
+    #[test]
+    fn test_empty_transform_to_set() {
+        let input_mapping: HashMap<String, Vec<String>> = HashMap::new();
+        let mapping_set: MappingSet = transform_to_set(&input_mapping);
+        let expected_result: MappingSet = HashMap::new();
+        assert_eq!(mapping_set, expected_result);
     }
 }
