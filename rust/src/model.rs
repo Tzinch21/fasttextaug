@@ -1,7 +1,4 @@
 mod base;
-mod keyboard;
-mod ocr;
+pub mod character;
 
 pub use base::{BaseModel, Mapping};
-pub use keyboard::KeyboardModel;
-pub use ocr::OcrModel;

@@ -3,11 +3,11 @@ use std::collections::{HashMap, HashSet};
 pub type Mapping = HashMap<String, Vec<String>>;
 
 pub trait BaseModel {
-    fn get_model(&self) -> Option<&Mapping>;
+    fn get_mapping(&self) -> Option<&Mapping>;
 
     /// Get model stats (len, capacity, Vec<len, capacity> for each array)
     fn get_stats(&self) -> (usize, usize, Vec<(usize, usize)>) {
-        match self.get_model() {
+        match self.get_mapping() {
             Some(model) => {
                 let mut arr_stats = Vec::with_capacity(model.len());
                 for (_, arr) in model {
@@ -20,14 +20,14 @@ pub trait BaseModel {
     }
 
     fn key_exists(&self, data: &str) -> bool {
-        if let Some(model) = self.get_model() {
+        if let Some(model) = self.get_mapping() {
             return model.contains_key(data);
         }
         false
     }
 
     fn predict(&self, data: &str) -> Option<&Vec<String>> {
-        if let Some(model) = self.get_model() {
+        if let Some(model) = self.get_mapping() {
             return model.get(data);
         }
         None
@@ -54,7 +54,7 @@ mod tests {
         model: Option<Mapping>,
     }
     impl BaseModel for MockModel {
-        fn get_model(&self) -> Option<&Mapping> {
+        fn get_mapping(&self) -> Option<&Mapping> {
             if let Some(model) = &self.model {
                 return Some(model);
             }

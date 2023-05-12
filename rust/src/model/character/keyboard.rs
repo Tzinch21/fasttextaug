@@ -1,6 +1,7 @@
 use std::path::Path;
 
-use super::{BaseModel, Mapping};
+use super::super::{BaseModel, Mapping};
+use super::CharacterModel;
 use crate::utils;
 
 pub struct KeyboardModel {
@@ -78,7 +79,7 @@ impl KeyboardModel {
 }
 
 impl BaseModel for KeyboardModel {
-    fn get_model(&self) -> Option<&Mapping> {
+    fn get_mapping(&self) -> Option<&Mapping> {
         if let Some(model) = &self.model {
             return Some(model);
         }
@@ -86,10 +87,12 @@ impl BaseModel for KeyboardModel {
     }
 }
 
+impl CharacterModel for KeyboardModel {}
+
 #[cfg(test)]
 mod tests {
-    use super::super::super::utils::transform_to_set;
     use super::*;
+    use crate::utils::transform_to_set;
     use std::collections::HashMap;
 
     #[test]
@@ -149,7 +152,7 @@ mod tests {
             model: None,
         };
         allow_all_caps.load_model();
-        let allow_all_caps_set = transform_to_set(allow_all_caps.get_model().unwrap());
+        let allow_all_caps_set = transform_to_set(allow_all_caps.get_mapping().unwrap());
         let expected_allow_all_caps = HashMap::from([
             (
                 String::from("а"),
@@ -204,7 +207,7 @@ mod tests {
             model: None,
         };
         allow_all.load_model();
-        let allow_all_set = transform_to_set(allow_all.get_model().unwrap());
+        let allow_all_set = transform_to_set(allow_all.get_mapping().unwrap());
         let expected_allow_all = HashMap::from([
             (
                 String::from("а"),
@@ -232,7 +235,7 @@ mod tests {
             model: None,
         };
         forbid_spec_caps.load_model();
-        let forbid_spec_caps_set = transform_to_set(forbid_spec_caps.get_model().unwrap());
+        let forbid_spec_caps_set = transform_to_set(forbid_spec_caps.get_mapping().unwrap());
         let expected_forbid_spec_caps = HashMap::from([
             (
                 String::from("а"),
@@ -263,7 +266,7 @@ mod tests {
             model: None,
         };
         forbid_spec.load_model();
-        let forbid_spec_set = transform_to_set(forbid_spec.get_model().unwrap());
+        let forbid_spec_set = transform_to_set(forbid_spec.get_mapping().unwrap());
         let expected_forbid_spec = HashMap::from([
             (
                 String::from("а"),
@@ -287,7 +290,7 @@ mod tests {
             model: None,
         };
         forbid_num_caps.load_model();
-        let forbid_num_caps_set = transform_to_set(forbid_num_caps.get_model().unwrap());
+        let forbid_num_caps_set = transform_to_set(forbid_num_caps.get_mapping().unwrap());
         let expected_forbid_num_caps = HashMap::from([
             (
                 String::from("а"),
@@ -318,7 +321,7 @@ mod tests {
             model: None,
         };
         forbid_num.load_model();
-        let forbid_num_set = transform_to_set(forbid_num.get_model().unwrap());
+        let forbid_num_set = transform_to_set(forbid_num.get_mapping().unwrap());
         let expected_forbid_num = HashMap::from([
             (
                 String::from("а"),
@@ -342,7 +345,7 @@ mod tests {
             model: None,
         };
         forbid_all_caps.load_model();
-        let forbid_all_caps_set = transform_to_set(forbid_all_caps.get_model().unwrap());
+        let forbid_all_caps_set = transform_to_set(forbid_all_caps.get_mapping().unwrap());
         let expected_forbid_all_caps = HashMap::from([
             (
                 String::from("а"),
@@ -369,7 +372,7 @@ mod tests {
             model: None,
         };
         forbid_all.load_model();
-        let forbid_all_set = transform_to_set(forbid_all.get_model().unwrap());
+        let forbid_all_set = transform_to_set(forbid_all.get_mapping().unwrap());
         let expected_forbid_all = HashMap::from([(String::from("а"), vec![String::from("б")])]);
         assert_eq!(forbid_all_set, transform_to_set(&expected_forbid_all));
     }
@@ -383,11 +386,11 @@ mod tests {
             model_path: String::from("test_res/small_keyboard.json"),
             model: None,
         };
-        assert_eq!(key_model.get_model(), None);
+        assert_eq!(key_model.get_mapping(), None);
         key_model.load_model();
         let expected_all = HashMap::from([(String::from("а"), vec![String::from("б")])]);
-        assert_eq!(*key_model.get_model().unwrap(), expected_all);
+        assert_eq!(*key_model.get_mapping().unwrap(), expected_all);
         key_model.load_model();
-        assert_eq!(*key_model.get_model().unwrap(), expected_all);
+        assert_eq!(*key_model.get_mapping().unwrap(), expected_all);
     }
 }

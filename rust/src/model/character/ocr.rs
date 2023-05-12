@@ -1,4 +1,5 @@
-use super::base::{BaseModel, Mapping};
+use super::super::base::{BaseModel, Mapping};
+use super::CharacterModel;
 use crate::utils;
 use std::path::Path;
 
@@ -67,13 +68,15 @@ impl OcrModel {
 }
 
 impl BaseModel for OcrModel {
-    fn get_model(&self) -> Option<&Mapping> {
+    fn get_mapping(&self) -> Option<&Mapping> {
         if let Some(model) = &self.model {
             return Some(model);
         }
         return None;
     }
 }
+
+impl CharacterModel for OcrModel {}
 
 #[cfg(test)]
 mod tests {
@@ -159,7 +162,7 @@ mod tests {
             ),
             (String::from("ю"), vec![String::from("B")]),
         ]);
-        let obs_set = transform_to_set(&ocr_model.get_model().unwrap());
+        let obs_set = transform_to_set(&ocr_model.get_mapping().unwrap());
         let exp_set = transform_to_set(&expected);
         assert_eq!(obs_set, exp_set);
         assert_eq!(ocr_model.model_path, String::from("internal mapping"));
@@ -171,7 +174,7 @@ mod tests {
     #[test]
     fn test_load_model() {
         let mut ocr = OcrModel::new(String::from("test_res/small_mapping.json"));
-        assert_eq!(ocr.get_model(), None);
+        assert_eq!(ocr.get_mapping(), None);
 
         ocr.load_model();
         let exp_hash = HashMap::from([
@@ -184,7 +187,7 @@ mod tests {
             (String::from("b"), vec![String::from("A")]),
             (String::from("f"), vec![String::from("B")]),
         ]);
-        let obs_set = transform_to_set(ocr.get_model().unwrap());
+        let obs_set = transform_to_set(ocr.get_mapping().unwrap());
         assert_eq!(obs_set, transform_to_set(&exp_hash));
 
         ocr.load_model();

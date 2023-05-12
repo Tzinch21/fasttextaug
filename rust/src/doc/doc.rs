@@ -77,6 +77,19 @@ impl Doc {
         word_tokens
     }
 
+    pub fn get_word_tokens_count(&self, include_special_char: bool) -> usize {
+        let mut count = 0;
+        for token in self.tokens.iter() {
+            let token_type = token.get_original().kind();
+            match (token_type, include_special_char) {
+                (TokenType::WordToken, _) => count += 1,
+                (TokenType::SpecSymbolToken, true) => count += 1,
+                (_, _) => (),
+            }
+        }
+        count
+    }
+
     pub fn add_change_in_token_log(
         &mut self,
         token_idx: usize,

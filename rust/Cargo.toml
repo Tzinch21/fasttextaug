@@ -8,6 +8,7 @@ name = "fasttextaug"
 crate-type = ["cdylib"]
 
 [dependencies]
+rand = "0.8.5"
 serde_json = "1.0.96"
 
 [dependencies.pyo3]

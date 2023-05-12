@@ -1,6 +1,6 @@
-pub mod changelog;
-pub mod doc;
-pub mod token;
+mod changelog;
+mod doc;
+mod token;
 
 pub use changelog::ChangeLog;
 pub use doc::Doc;

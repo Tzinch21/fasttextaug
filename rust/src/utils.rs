@@ -47,6 +47,14 @@ pub fn transform_to_set(mapping: &Mapping) -> MappingSet {
     new_val
 }
 
+pub fn get_chars_len(input: &str) -> usize {
+    let mut counter = 0;
+    for _ in input.chars() {
+        counter += 1
+    }
+    counter
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -136,5 +144,29 @@ mod tests {
         let mapping_set: MappingSet = transform_to_set(&input_mapping);
         let expected_result: MappingSet = HashMap::new();
         assert_eq!(mapping_set, expected_result);
+    }
+
+    #[test]
+    fn test_english_char_counter() {
+        let input = "Example";
+        let chars_count = get_chars_len(input);
+        assert_eq!(input.len(), 7);
+        assert_eq!(chars_count, 7)
+    }
+
+    #[test]
+    fn test_cyrillic_char_counter() {
+        let input: &str = "Пример";
+        let chars_count = get_chars_len(input);
+        assert_eq!(input.len(), 12);
+        assert_eq!(chars_count, 6)
+    }
+
+    #[test]
+    fn test_mixed_char_counter() {
+        let input: &str = "It's my пример";
+        let chars_count = get_chars_len(input);
+        assert_eq!(input.len(), 20);
+        assert_eq!(chars_count, 14)
     }
 }
