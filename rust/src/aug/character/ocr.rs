@@ -1,10 +1,12 @@
+use rand::rngs::StdRng;
+
 use super::super::{AugCountParams, BaseAugmentor};
 use super::CharacterAugmentor;
-use crate::doc::{Doc, TokenType};
+use crate::doc::Doc;
 use crate::model::character::OcrModel;
 use std::collections::HashSet;
 
-struct OcrAugmentor<'a> {
+pub struct OcrAugmentor<'a> {
     aug_params_char: AugCountParams,
     aug_params_word: AugCountParams,
     min_chars: Option<usize>,
@@ -12,7 +14,28 @@ struct OcrAugmentor<'a> {
     stopwords: Option<&'a HashSet<String>>,
 }
 
+impl<'a> OcrAugmentor<'a> {
+    fn new(
+        aug_params_char: AugCountParams,
+        aug_params_word: AugCountParams,
+        min_chars: Option<usize>,
+        model: &'a OcrModel,
+        stopwords: Option<&'a HashSet<String>>,
+    ) -> Self {
+        OcrAugmentor {
+            aug_params_char,
+            aug_params_word,
+            min_chars,
+            model,
+            stopwords,
+        }
+    }
+}
+
 impl<'a> BaseAugmentor<OcrModel> for OcrAugmentor<'a> {
+    fn augment(&self, doc: &mut Doc, rng: &mut StdRng) -> () {
+        self.substitute(doc, rng)
+    }
     fn get_action(&self) -> () {}
     fn get_aug_params_word(&self) -> &AugCountParams {
         &self.aug_params_word
@@ -34,71 +57,60 @@ impl<'a> CharacterAugmentor<OcrModel> for OcrAugmentor<'a> {
     }
 }
 
-impl<'a> OcrAugmentor<'a> {
-    fn substitute(&self, doc: &mut Doc) -> () {
-        let aug_tokens = self.sample_word_tokens_to_aug(doc);
-        let mut change_seq = 0;
-        for a_token in aug_tokens {
-            let raw_token = a_token.get_original().token();
-            let aug_chars_indexes = self.sample_chars_to_aug(raw_token);
-            let mut result = String::with_capacity(raw_token.len() * 2);
-            raw_token
-                .chars()
-                .enumerate()
-                .map(|(idx, ch)| self.predict_char(idx, ch, &aug_chars_indexes))
-                .for_each(|x| result.push_str(&x));
-            a_token.add_change(TokenType::WordToken, result, change_seq);
-            change_seq += 1;
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils;
+    use rand::SeedableRng;
 
     #[test]
     fn test_substitute() {
         let mut model = OcrModel::new(String::from("test_res/ocr_en.json"));
         model.load_model();
         let stopwords = HashSet::from([String::from("fox"), String::from("The")]);
-        let augmentor = OcrAugmentor {
-            aug_params_char: AugCountParams::new(Some(1), Some(5), None),
-            aug_params_word: AugCountParams::new(Some(2), Some(6), None),
-            min_chars: Some(3),
-            model: &model,
-            stopwords: Some(&stopwords),
-        };
+        let augmentor = OcrAugmentor::new(
+            AugCountParams::new(Some(1), Some(5), None),
+            AugCountParams::new(Some(2), Some(6), None),
+            Some(3),
+            &model,
+            Some(&stopwords),
+        );
         let input_string = String::from("The quick brown fox jumps over the lazy dog .");
         let mut doc = Doc::new(input_string.clone());
-        augmentor.substitute(&mut doc);
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
-        assert_eq!(result.len(), input_string.len());
+        assert_eq!(
+            utils::get_chars_len(&result),
+            utils::get_chars_len(&input_string)
+        );
         assert!(result.contains("The"));
         assert!(result.contains("fox"));
     }
 
-    // #[test]
-    // fn test_substitute_cyrillic() {
-    //     let mut model = OcrModel::new(String::from("test_res/ocr_ru.json"));
-    //     model.load_model();
-    //     let stopwords = HashSet::from([
-    //         String::from("пример"),
-    //         String::from("Я")
-    //     ]);
-    //     let augmentor = OcrAugmentor{
-    //         aug_params_char: AugCountParams::new(Some(1), Some(5), None),
-    //         aug_params_word: AugCountParams::new(Some(2), Some(6), None),
-    //         min_chars: Some(4),
-    //         model:&model,
-    //         stopwords: Some(&stopwords)
-    //     };
-    //     let input_string = String::from("Очень важный пример для аугментации");
-    //     let mut doc = Doc::new(input_string.clone());
-    //     augmentor.substitute(&mut doc);
-    //     let result = doc.get_augmented_string();
-    //     assert_eq!(result, input_string);
-    //     assert_eq!(result.len(), input_string.len())
-    // }
+    #[test]
+    fn test_substitute_cyrillic() {
+        let mut model = OcrModel::new(String::from("test_res/ocr_ru.json"));
+        model.load_model();
+        let stopwords = HashSet::from([String::from("пример"), String::from("Я")]);
+        let augmentor = OcrAugmentor::new(
+            AugCountParams::new(Some(1), Some(5), None),
+            AugCountParams::new(Some(2), Some(6), None),
+            Some(4),
+            &model,
+            Some(&stopwords),
+        );
+        let input_string = String::from("Очень важный пример для аугментации");
+        let mut doc = Doc::new(input_string.clone());
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        augmentor.substitute(&mut doc, &mut rng);
+        let result = doc.get_augmented_string();
+        assert_ne!(result, input_string);
+        assert_eq!(
+            utils::get_chars_len(&result),
+            utils::get_chars_len(&input_string)
+        );
+        assert!(result.contains("пример"));
+    }
 }

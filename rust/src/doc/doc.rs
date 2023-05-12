@@ -12,7 +12,7 @@ pub struct Doc {
 impl Doc {
     pub fn new(input: String) -> Self {
         let tokens = Doc::tokenize(&input);
-        let changed_count: usize = 0;
+        let changed_count = 0;
         Doc {
             input,
             tokens,
@@ -46,9 +46,15 @@ impl Doc {
                 pos += c.len();
             }
         }
-        if (pos == 0) & (text.len() > 0) {
-            // no matched indices
-            res.push(ChangeLog::new(TokenType::WordToken, text.clone(), None));
+        let remains = text.get(pos..);
+        if let Some(value) = remains {
+            if value.len() > 0 {
+                res.push(ChangeLog::new(
+                    TokenType::WordToken,
+                    String::from(value),
+                    None,
+                ));
+            }
         }
         res.shrink_to(res.len() + RESERVE_CAPACITY_TO_INSERT_OPERATIONS);
         res
@@ -120,6 +126,10 @@ impl Doc {
     pub fn get_changed_count(&self) -> usize {
         self.changed_count
     }
+
+    pub fn set_change_count(&mut self, value: usize) -> () {
+        self.changed_count = value
+    }
 }
 
 #[cfg(test)]
@@ -183,6 +193,42 @@ mod tests {
         assert_eq!(word_token_len, 4);
         let word_spec_token_len = doc.get_word_tokens(true).len();
         assert_eq!(word_spec_token_len, 6);
+    }
+
+    #[test]
+    fn test_tokenize_one_more() {
+        let input_str = String::from("Create tokens");
+        let expected_logs = vec![
+            ChangeLog::new(TokenType::WordToken, String::from("Create"), None),
+            ChangeLog::new(TokenType::SpaceToken, String::from(" "), None),
+            ChangeLog::new(TokenType::WordToken, String::from("tokens"), None),
+        ];
+        assert_eq!(Doc::tokenize(&input_str), expected_logs);
+
+        let mut doc = Doc::new(input_str);
+        assert_eq!(doc.tokens, expected_logs);
+        let word_token_len = doc.get_word_tokens(false).len();
+        assert_eq!(word_token_len, 2);
+        let word_spec_token_len = doc.get_word_tokens(true).len();
+        assert_eq!(word_spec_token_len, 2);
+    }
+
+    #[test]
+    fn test_tokenize_one_more_cyrillic() {
+        let input_str = String::from("Делаем токены");
+        let expected_logs = vec![
+            ChangeLog::new(TokenType::WordToken, String::from("Делаем"), None),
+            ChangeLog::new(TokenType::SpaceToken, String::from(" "), None),
+            ChangeLog::new(TokenType::WordToken, String::from("токены"), None),
+        ];
+        assert_eq!(Doc::tokenize(&input_str), expected_logs);
+
+        let mut doc = Doc::new(input_str);
+        assert_eq!(doc.tokens, expected_logs);
+        let word_token_len = doc.get_word_tokens(false).len();
+        assert_eq!(word_token_len, 2);
+        let word_spec_token_len = doc.get_word_tokens(true).len();
+        assert_eq!(word_spec_token_len, 2);
     }
 
     #[test]

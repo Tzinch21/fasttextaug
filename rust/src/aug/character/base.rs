@@ -1,7 +1,9 @@
 use super::super::{AugCountParams, BaseAugmentor};
+use crate::doc::{Doc, TokenType};
 use crate::model::character::CharacterModel;
 use crate::utils;
-use rand::{prelude::IteratorRandom, thread_rng};
+use rand::prelude::IteratorRandom;
+use rand::rngs::StdRng;
 use std::collections::HashSet;
 
 pub trait CharacterAugmentor<T>: BaseAugmentor<T>
@@ -10,7 +12,7 @@ where
 {
     fn get_aug_params_char(&self) -> &AugCountParams;
 
-    fn sample_chars_to_aug(&self, token: &String) -> HashSet<usize> {
+    fn sample_chars_to_aug(&self, token: &String, rng: &mut StdRng) -> HashSet<usize> {
         let chars_len = utils::get_chars_len(token);
         let mut char_indexes: Vec<usize> = Vec::with_capacity(chars_len);
         let aug_cnt = self.get_aug_params_char().calculate_aug_cnt(chars_len);
@@ -27,19 +29,23 @@ where
         } else if aug_cnt >= char_indexes.len() {
             sampled = char_indexes;
         } else {
-            let mut rng = thread_rng();
-            sampled = char_indexes.into_iter().choose_multiple(&mut rng, aug_cnt);
+            sampled = char_indexes.into_iter().choose_multiple(rng, aug_cnt);
         }
         HashSet::from_iter(sampled)
     }
 
-    fn predict_char(&self, idx: usize, ch: char, char_idxs: &HashSet<usize>) -> String {
-        let mut rng = thread_rng();
+    fn predict_char(
+        &self,
+        idx: usize,
+        ch: char,
+        char_idxs: &HashSet<usize>,
+        rng: &mut StdRng,
+    ) -> String {
         let ch_str = ch.to_string();
         if char_idxs.contains(&idx) {
             let predict = self.get_model().predict(&ch_str);
             if let Some(predicted) = predict {
-                let replacer = predicted.into_iter().choose(&mut rng);
+                let replacer = predicted.into_iter().choose(rng);
                 if let Some(value) = replacer {
                     return value.clone();
                 }
@@ -47,14 +53,37 @@ where
         }
         ch_str
     }
+
+    fn substitute(&self, doc: &mut Doc, rng: &mut StdRng) -> () {
+        let aug_tokens = self.sample_word_tokens_to_aug(doc, rng);
+        let mut change_seq = 0;
+        for a_token in aug_tokens {
+            let raw_token = a_token.get_original().token();
+            let aug_chars_indexes = self.sample_chars_to_aug(raw_token, rng);
+            if aug_chars_indexes.len() == 0 {
+                continue;
+            }
+            let mut result = String::with_capacity(raw_token.len() * 2);
+            raw_token
+                .chars()
+                .enumerate()
+                .map(|(idx, ch)| self.predict_char(idx, ch, &aug_chars_indexes, rng))
+                .for_each(|x| result.push_str(&x));
+            result.shrink_to_fit();
+            a_token.add_change(TokenType::WordToken, result, change_seq);
+            change_seq += 1;
+        }
+        doc.set_change_count(change_seq);
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::{HashMap, HashSet};
-
     use super::*;
     use crate::model::{BaseModel, Mapping};
+    use rand::SeedableRng;
+    use std::collections::{HashMap, HashSet};
+    use utils;
     struct MockModel {
         mapping: Option<Mapping>,
     }
@@ -104,6 +133,7 @@ mod tests {
         model: MockModel,
     }
     impl BaseAugmentor<MockModel> for MockAugmentor {
+        fn augment(&self, _doc: &mut Doc, _rng: &mut StdRng) -> () {}
         fn get_action(&self) -> () {}
         fn get_aug_params_word(&self) -> &AugCountParams {
             &self.aug_params_word
@@ -130,8 +160,9 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("Qvqv"));
-        assert_eq!(res.len(), 2)
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("Qvqv"), &mut rng);
+        assert_eq!(res.len(), 2);
     }
 
     #[test]
@@ -142,9 +173,10 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("агсагсагс"));
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("агсагсагс"), &mut rng);
         // every char presented at model mapping (9), but aug_params get 4
-        assert_eq!(res.len(), 4)
+        assert_eq!(res.len(), 4);
     }
 
     #[test]
@@ -155,10 +187,11 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("vavava"));
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("vavava"), &mut rng);
         // not every char presented at model mapping (only 3), but aug_params gets 5.
         // We still take all 3 possible variants
-        assert_eq!(res.len(), 3)
+        assert_eq!(res.len(), 3);
     }
 
     #[test]
@@ -169,7 +202,8 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("Авиастроение"));
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("Авиастроение"), &mut rng);
         assert_eq!(res.len(), 3)
     }
 
@@ -181,7 +215,8 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("vavava"));
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("vavava"), &mut rng);
         assert_eq!(res.len(), 0)
     }
 
@@ -193,7 +228,8 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("none"));
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("none"), &mut rng);
         assert_eq!(res.len(), 0)
     }
 
@@ -205,7 +241,8 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("агс"));
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("агс"), &mut rng);
         assert_eq!(res.len(), 0)
     }
 
@@ -217,7 +254,135 @@ mod tests {
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
         };
-        let res = mock_aug.sample_chars_to_aug(&String::from("ноль"));
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let res = mock_aug.sample_chars_to_aug(&String::from("ноль"), &mut rng);
         assert_eq!(res.len(), 0)
+    }
+
+    #[test]
+    fn test_predict_char_not_idx_not_model() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, None),
+            aug_params_word: AugCountParams::new(None, None, None),
+            model: model,
+        };
+        let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let result = mock_aug.predict_char(0, 'м', &char_idxs, &mut rng);
+        assert_eq!(result, String::from("м"));
+    }
+
+    #[test]
+    fn test_predict_char_not_idx_in_model() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, None),
+            aug_params_word: AugCountParams::new(None, None, None),
+            model: model,
+        };
+        let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let result = mock_aug.predict_char(0, 'г', &char_idxs, &mut rng);
+        assert_eq!(result, String::from("г"));
+    }
+
+    #[test]
+    fn test_predict_char_in_idx_not_model() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, None),
+            aug_params_word: AugCountParams::new(None, None, None),
+            model: model,
+        };
+        let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let result = mock_aug.predict_char(3, 'к', &char_idxs, &mut rng);
+        assert_eq!(result, String::from("к"));
+    }
+
+    #[test]
+    fn test_predict_char_in_idx_in_model() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, None),
+            aug_params_word: AugCountParams::new(None, None, None),
+            model: model,
+        };
+        let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        let result = mock_aug.predict_char(3, 'А', &char_idxs, &mut rng);
+        assert!((result == String::from("Х")) | (result == String::from("Ш")));
+    }
+
+    #[test]
+    fn test_substitute_word_non_sampled() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, None),
+            aug_params_word: AugCountParams::new(None, None, Some(0.0)),
+            model: model,
+        };
+        let input_string = String::from("Пример строки для аугментации");
+        let mut doc = Doc::new(input_string.clone());
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        mock_aug.substitute(&mut doc, &mut rng);
+        assert_eq!(doc.get_augmented_string(), input_string);
+        assert_eq!(doc.get_changed_count(), 0)
+    }
+
+    #[test]
+    fn test_substitute_word_non_sampled_char() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, Some(0.0)),
+            aug_params_word: AugCountParams::new(None, None, None),
+            model: model,
+        };
+        let input_string = String::from("Пример строки для аугментации");
+        let mut doc = Doc::new(input_string.clone());
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        mock_aug.substitute(&mut doc, &mut rng);
+        assert_eq!(doc.get_augmented_string(), input_string);
+        assert_eq!(doc.get_changed_count(), 0)
+    }
+
+    #[test]
+    fn test_substitute_word_non_chars_in_model() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, None),
+            aug_params_word: AugCountParams::new(None, None, None),
+            model: model,
+        };
+        let input_string = String::from("Пример ещё один");
+        let mut doc = Doc::new(input_string.clone());
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        mock_aug.substitute(&mut doc, &mut rng);
+        assert_eq!(doc.get_augmented_string(), input_string);
+        assert_eq!(doc.get_changed_count(), 0)
+    }
+
+    #[test]
+    fn test_substitute_word() {
+        let model = MockModel::new();
+        let mock_aug = MockAugmentor {
+            aug_params_char: AugCountParams::new(None, None, None),
+            aug_params_word: AugCountParams::new(Some(2), None, None),
+            model: model,
+        };
+        let input_string = String::from("Апельсин гора стакан");
+        let mut doc = Doc::new(input_string.clone());
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        mock_aug.substitute(&mut doc, &mut rng);
+        assert_ne!(
+            doc.get_augmented_string(),
+            String::from("Апельсин гора стакан")
+        );
+        assert_eq!(
+            utils::get_chars_len(&doc.get_augmented_string()),
+            utils::get_chars_len(&input_string)
+        );
+        assert_eq!(doc.get_changed_count(), 2)
     }
 }

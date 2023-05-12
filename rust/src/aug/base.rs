@@ -1,4 +1,5 @@
-use rand::{prelude::IteratorRandom, thread_rng};
+use rand::prelude::IteratorRandom;
+use rand::rngs::StdRng;
 use std::collections::HashSet;
 
 use super::AugCountParams;
@@ -10,6 +11,7 @@ pub trait BaseAugmentor<T>
 where
     T: BaseModel,
 {
+    fn augment(&self, doc: &mut Doc, rng: &mut StdRng) -> ();
     fn get_action(&self) -> ();
     fn get_aug_params_word(&self) -> &AugCountParams;
     fn get_min_chars(&self) -> Option<usize> {
@@ -51,7 +53,11 @@ where
         filtered
     }
 
-    fn sample_word_tokens_to_aug<'a>(&self, doc: &'a mut Doc) -> Vec<&'a mut ChangeLog> {
+    fn sample_word_tokens_to_aug<'a>(
+        &self,
+        doc: &'a mut Doc,
+        rng: &mut StdRng,
+    ) -> Vec<&'a mut ChangeLog> {
         let origin_word_count = doc.get_word_tokens_count(self.get_use_special_chars());
         let filtered_word_tokens = self.get_filtered_word_tokens(doc);
         let aug_cnt = self
@@ -63,16 +69,17 @@ where
         } else if aug_cnt >= filtered_word_tokens.len() {
             return filtered_word_tokens;
         }
-        let mut rng = thread_rng();
         let sampled = filtered_word_tokens
             .into_iter()
-            .choose_multiple(&mut rng, aug_cnt);
+            .choose_multiple(rng, aug_cnt);
         sampled
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use rand::SeedableRng;
+
     use super::*;
     use crate::doc::*;
 
@@ -90,6 +97,7 @@ mod tests {
         use_special_chars: bool,
     }
     impl<'a> BaseAugmentor<MockModel> for MockAugmentor<'a> {
+        fn augment(&self, _doc: &mut Doc, _rng: &mut StdRng) -> () {}
         fn get_action(&self) -> () {}
         fn get_min_chars(&self) -> Option<usize> {
             self.min_chars
@@ -198,7 +206,8 @@ mod tests {
             stopwords: None,
             use_special_chars: false,
         };
-        let result = mock_object.sample_word_tokens_to_aug(&mut doc);
+        let mut rng = StdRng::from_entropy();
+        let result = mock_object.sample_word_tokens_to_aug(&mut doc, &mut rng);
         assert_eq!(result.len(), 2);
     }
 
@@ -212,7 +221,8 @@ mod tests {
             stopwords: None,
             use_special_chars: false,
         };
-        let result = mock_object.sample_word_tokens_to_aug(&mut doc);
+        let mut rng = StdRng::from_entropy();
+        let result = mock_object.sample_word_tokens_to_aug(&mut doc, &mut rng);
         assert_eq!(result.len(), 0);
     }
 
@@ -226,7 +236,8 @@ mod tests {
             stopwords: None,
             use_special_chars: true,
         };
-        let result = mock_object.sample_word_tokens_to_aug(&mut doc);
+        let mut rng = StdRng::from_entropy();
+        let result = mock_object.sample_word_tokens_to_aug(&mut doc, &mut rng);
         assert_eq!(result.len(), 3);
     }
 }

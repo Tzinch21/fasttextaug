@@ -24,6 +24,10 @@ impl KeyboardModel {
         spec_char_cond_met & num_cond_met
     }
 
+    pub fn get_allow_special_char(&self) -> bool {
+        self.allow_special_char
+    }
+
     pub fn new(
         allow_special_char: bool,
         allow_numeric: bool,
