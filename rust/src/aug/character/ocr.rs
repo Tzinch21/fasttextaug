@@ -15,7 +15,7 @@ pub struct OcrAugmentor<'a> {
 }
 
 impl<'a> OcrAugmentor<'a> {
-    fn new(
+    pub fn new(
         aug_params_char: AugCountParams,
         aug_params_word: AugCountParams,
         min_chars: Option<usize>,
@@ -104,7 +104,7 @@ mod tests {
         let input_string = String::from("Очень важный пример для аугментации");
         let mut doc = Doc::new(input_string.clone());
         let mut rng: StdRng = SeedableRng::from_entropy();
-        augmentor.substitute(&mut doc, &mut rng);
+        augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(

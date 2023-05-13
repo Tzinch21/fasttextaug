@@ -1,1 +1,1 @@
-from .wrappers import get_predict_from_ocr_model
+from fasttextaug import rust_fasttextaug

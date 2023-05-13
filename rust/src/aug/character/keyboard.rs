@@ -15,7 +15,7 @@ pub struct KeyboardAugmentor<'a> {
 }
 
 impl<'a> KeyboardAugmentor<'a> {
-    fn new(
+    pub fn new(
         aug_params_char: AugCountParams,
         aug_params_word: AugCountParams,
         min_chars: Option<usize>,
