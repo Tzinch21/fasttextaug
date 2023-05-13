@@ -125,6 +125,13 @@ impl Doc {
     pub fn set_change_count(&mut self, value: usize) -> () {
         self.changed_count = value
     }
+
+    pub fn set_to_original(&mut self) -> () {
+        for token in self.tokens.iter_mut() {
+            token.set_to_original();
+        }
+        self.changed_count = 0
+    }
 }
 
 #[cfg(test)]

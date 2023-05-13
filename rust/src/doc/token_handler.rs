@@ -35,6 +35,10 @@ impl TokenHandler {
         }
         &self.original_token
     }
+
+    pub fn set_to_original(&mut self) -> () {
+        self.changed_token = None
+    }
 }
 
 #[cfg(test)]
