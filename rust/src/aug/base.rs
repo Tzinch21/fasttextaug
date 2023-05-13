@@ -3,9 +3,8 @@ use rand::rngs::StdRng;
 use std::collections::HashSet;
 
 use super::AugCountParams;
-use crate::doc::{ChangeLog, Doc};
+use crate::doc::{Doc, TokenHandler};
 use crate::model::BaseModel;
-use crate::utils;
 
 pub trait BaseAugmentor<T>
 where
@@ -23,31 +22,31 @@ where
         false
     }
 
-    fn get_filtered_word_tokens<'a>(&self, doc: &'a mut Doc) -> Vec<&'a mut ChangeLog> {
+    fn get_filtered_word_tokens<'a>(&self, doc: &'a mut Doc) -> Vec<&'a mut TokenHandler> {
         let word_tokens = doc.get_word_tokens(self.get_use_special_chars());
         let mut filtered = Vec::with_capacity(word_tokens.len());
         let min_chars = self.get_min_chars();
         let stopwords = self.get_stopwords();
-        for log in word_tokens {
-            let orig_token = log.get_original().token();
-            let token_len = utils::get_chars_len(orig_token);
+        for handler in word_tokens {
+            let orig_token = handler.get_original().token();
+            let token_len = handler.get_original().utf8_len();
             match (min_chars, stopwords) {
                 (Some(min_c), Some(stop_set)) => {
                     if (!stop_set.contains(orig_token)) & (token_len >= min_c) {
-                        filtered.push(log)
+                        filtered.push(handler)
                     }
                 }
                 (Some(min_c), None) => {
                     if token_len >= min_c {
-                        filtered.push(log)
+                        filtered.push(handler)
                     }
                 }
                 (None, Some(stop_set)) => {
                     if !stop_set.contains(orig_token) {
-                        filtered.push(log)
+                        filtered.push(handler)
                     }
                 }
-                (None, None) => filtered.push(log),
+                (None, None) => filtered.push(handler),
             }
         }
         filtered
@@ -57,7 +56,7 @@ where
         &self,
         doc: &'a mut Doc,
         rng: &mut StdRng,
-    ) -> Vec<&'a mut ChangeLog> {
+    ) -> Vec<&'a mut TokenHandler> {
         let origin_word_count = doc.get_word_tokens_count(self.get_use_special_chars());
         let filtered_word_tokens = self.get_filtered_word_tokens(doc);
         let aug_cnt = self
@@ -128,11 +127,11 @@ mod tests {
             use_special_chars: true,
         };
         let result = mock_object.get_filtered_word_tokens(&mut doc);
-        let mut expected_logs = vec![
-            ChangeLog::new(TokenType::WordToken, String::from("string"), None),
-            ChangeLog::new(TokenType::SpecSymbolToken, String::from("!"), None),
+        let mut expected_handlers = vec![
+            TokenHandler::new(TokenType::WordToken, String::from("string")),
+            TokenHandler::new(TokenType::SpecSymbolToken, String::from("!")),
         ];
-        let expected: Vec<&mut ChangeLog> = expected_logs.iter_mut().collect();
+        let expected: Vec<&mut TokenHandler> = expected_handlers.iter_mut().collect();
         assert_eq!(result, expected);
     }
 
@@ -148,11 +147,11 @@ mod tests {
             use_special_chars: false,
         };
         let result = mock_object.get_filtered_word_tokens(&mut doc);
-        let mut expected_logs = vec![
-            ChangeLog::new(TokenType::WordToken, String::from("My"), None),
-            ChangeLog::new(TokenType::WordToken, String::from("example"), None),
+        let mut expected_handlers = vec![
+            TokenHandler::new(TokenType::WordToken, String::from("My")),
+            TokenHandler::new(TokenType::WordToken, String::from("example")),
         ];
-        let expected: Vec<&mut ChangeLog> = expected_logs.iter_mut().collect();
+        let expected: Vec<&mut TokenHandler> = expected_handlers.iter_mut().collect();
         assert_eq!(result, expected);
     }
 
@@ -167,11 +166,11 @@ mod tests {
             use_special_chars: true,
         };
         let result = mock_object.get_filtered_word_tokens(&mut doc);
-        let mut expected_logs = vec![
-            ChangeLog::new(TokenType::WordToken, String::from("пример"), None),
-            ChangeLog::new(TokenType::WordToken, String::from("строки"), None),
+        let mut expected_handlers = vec![
+            TokenHandler::new(TokenType::WordToken, String::from("пример")),
+            TokenHandler::new(TokenType::WordToken, String::from("строки")),
         ];
-        let expected: Vec<&mut ChangeLog> = expected_logs.iter_mut().collect();
+        let expected: Vec<&mut TokenHandler> = expected_handlers.iter_mut().collect();
         assert_eq!(result, expected);
     }
 
@@ -186,13 +185,13 @@ mod tests {
             use_special_chars: true,
         };
         let result = mock_object.get_filtered_word_tokens(&mut doc);
-        let mut expected_logs = vec![
-            ChangeLog::new(TokenType::WordToken, String::from("My"), None),
-            ChangeLog::new(TokenType::WordToken, String::from("example"), None),
-            ChangeLog::new(TokenType::WordToken, String::from("string"), None),
-            ChangeLog::new(TokenType::SpecSymbolToken, String::from("!"), None),
+        let mut expected_handlers = vec![
+            TokenHandler::new(TokenType::WordToken, String::from("My")),
+            TokenHandler::new(TokenType::WordToken, String::from("example")),
+            TokenHandler::new(TokenType::WordToken, String::from("string")),
+            TokenHandler::new(TokenType::SpecSymbolToken, String::from("!")),
         ];
-        let expected: Vec<&mut ChangeLog> = expected_logs.iter_mut().collect();
+        let expected: Vec<&mut TokenHandler> = expected_handlers.iter_mut().collect();
         assert_eq!(result, expected);
     }
 

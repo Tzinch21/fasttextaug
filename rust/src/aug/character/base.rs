@@ -1,7 +1,6 @@
 use super::super::{AugCountParams, BaseAugmentor};
-use crate::doc::{Doc, TokenType};
+use crate::doc::{Doc, Token, TokenType};
 use crate::model::character::CharacterModel;
-use crate::utils;
 use rand::prelude::IteratorRandom;
 use rand::rngs::StdRng;
 use std::collections::HashSet;
@@ -12,11 +11,12 @@ where
 {
     fn get_aug_params_char(&self) -> &AugCountParams;
 
-    fn sample_chars_to_aug(&self, token: &String, rng: &mut StdRng) -> HashSet<usize> {
-        let chars_len = utils::get_chars_len(token);
-        let mut char_indexes: Vec<usize> = Vec::with_capacity(chars_len);
-        let aug_cnt = self.get_aug_params_char().calculate_aug_cnt(chars_len);
-        for (idx, char) in token.chars().enumerate() {
+    fn sample_chars_to_aug(&self, token: &Token, rng: &mut StdRng) -> HashSet<usize> {
+        let mut char_indexes: Vec<usize> = Vec::with_capacity(token.utf8_len());
+        let aug_cnt = self
+            .get_aug_params_char()
+            .calculate_aug_cnt(token.utf8_len());
+        for (idx, char) in token.token().chars().enumerate() {
             let key = char.to_string();
             let contains = self.get_model().key_exists(&key);
             if contains {
@@ -58,19 +58,20 @@ where
         let aug_tokens = self.sample_word_tokens_to_aug(doc, rng);
         let mut change_seq = 0;
         for a_token in aug_tokens {
-            let raw_token = a_token.get_original().token();
-            let aug_chars_indexes = self.sample_chars_to_aug(raw_token, rng);
+            let original_token = a_token.get_original();
+            let aug_chars_indexes = self.sample_chars_to_aug(original_token, rng);
             if aug_chars_indexes.len() == 0 {
                 continue;
             }
-            let mut result = String::with_capacity(raw_token.len() * 2);
-            raw_token
+            let mut result = String::with_capacity(original_token.byte_len() * 2);
+            original_token
+                .token()
                 .chars()
                 .enumerate()
                 .map(|(idx, ch)| self.predict_char(idx, ch, &aug_chars_indexes, rng))
                 .for_each(|x| result.push_str(&x));
             result.shrink_to_fit();
-            a_token.add_change(TokenType::WordToken, result, change_seq);
+            a_token.change(TokenType::WordToken, result);
             change_seq += 1;
         }
         doc.set_change_count(change_seq);
@@ -81,9 +82,9 @@ where
 mod tests {
     use super::*;
     use crate::model::{BaseModel, Mapping};
+    use crate::utils;
     use rand::SeedableRng;
     use std::collections::{HashMap, HashSet};
-    use utils;
     struct MockModel {
         mapping: Option<Mapping>,
     }
@@ -161,7 +162,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("Qvqv"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("Qvqv"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         assert_eq!(res.len(), 2);
     }
 
@@ -174,7 +176,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("агсагсагс"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("агсагсагс"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         // every char presented at model mapping (9), but aug_params get 4
         assert_eq!(res.len(), 4);
     }
@@ -188,7 +191,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("vavava"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("vavava"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         // not every char presented at model mapping (only 3), but aug_params gets 5.
         // We still take all 3 possible variants
         assert_eq!(res.len(), 3);
@@ -203,7 +207,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("Авиастроение"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("Авиастроение"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         assert_eq!(res.len(), 3)
     }
 
@@ -216,7 +221,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("vavava"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("vavava"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         assert_eq!(res.len(), 0)
     }
 
@@ -229,7 +235,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("none"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("none"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         assert_eq!(res.len(), 0)
     }
 
@@ -242,7 +249,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("агс"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("агс"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         assert_eq!(res.len(), 0)
     }
 
@@ -255,7 +263,8 @@ mod tests {
             model: model,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
-        let res = mock_aug.sample_chars_to_aug(&String::from("ноль"), &mut rng);
+        let token = Token::new(TokenType::WordToken, String::from("ноль"));
+        let res = mock_aug.sample_chars_to_aug(&token, &mut rng);
         assert_eq!(res.len(), 0)
     }
 
