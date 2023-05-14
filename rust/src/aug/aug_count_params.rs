@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct AugCountParams {
     aug_min: Option<usize>,
     aug_max: Option<usize>,

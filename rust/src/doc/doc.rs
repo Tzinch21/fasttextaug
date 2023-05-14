@@ -1,20 +1,27 @@
 use super::token::{Token, TokenType};
 use super::token_handler::TokenHandler;
-
+use std::sync::Arc;
 const RESERVE_CAPACITY_TO_INSERT_OPERATIONS: usize = 5;
 
 pub struct Doc {
-    input: String,
     tokens: Vec<TokenHandler>,
     changed_count: usize,
 }
 
 impl Doc {
-    pub fn new(input: String) -> Self {
-        let tokens = Doc::tokenize(&input);
+    pub fn new(input: &String) -> Self {
+        let tokens = Doc::tokenize(input);
         let changed_count = 0;
         Doc {
-            input,
+            tokens,
+            changed_count,
+        }
+    }
+
+    pub fn from_arc(input: Arc<String>) -> Self {
+        let tokens = Doc::tokenize(input.as_ref());
+        let changed_count = 0;
+        Doc {
             tokens,
             changed_count,
         }
@@ -102,10 +109,6 @@ impl Doc {
         }
     }
 
-    pub fn get_input(&self) -> &String {
-        &self.input
-    }
-
     pub fn get_original_tokens(&self) -> Vec<&Token> {
         self.tokens.iter().map(|ch| ch.get_original()).collect()
     }
@@ -141,7 +144,6 @@ mod tests {
     impl Doc {
         fn from_handlers(handlers: Vec<TokenHandler>) -> Self {
             Doc {
-                input: String::new(),
                 tokens: handlers,
                 changed_count: 0,
             }
@@ -164,7 +166,7 @@ mod tests {
         ];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 3);
@@ -189,7 +191,7 @@ mod tests {
         ];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 4);
@@ -207,7 +209,7 @@ mod tests {
         ];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 2);
@@ -225,7 +227,7 @@ mod tests {
         ];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 2);
@@ -242,7 +244,7 @@ mod tests {
         )];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 1);
@@ -260,7 +262,7 @@ mod tests {
         ];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 0);
@@ -278,7 +280,7 @@ mod tests {
         ];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 0);
@@ -292,7 +294,7 @@ mod tests {
         let expected_handlers: Vec<TokenHandler> = vec![];
         assert_eq!(Doc::tokenize(&input_str), expected_handlers);
 
-        let mut doc = Doc::new(input_str);
+        let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
         let word_token_len = doc.get_word_tokens(false).len();
         assert_eq!(word_token_len, 0);
@@ -379,14 +381,14 @@ mod tests {
 
     #[test]
     fn test_dont_add_change_in_token_handler() {
-        let doc = Doc::new(String::from("Test example!"));
+        let doc = Doc::new(&String::from("Test example!"));
         assert_eq!(doc.changed_count, 0);
         assert_eq!(doc.get_augmented_string(), String::from("Test example!"))
     }
 
     #[test]
     fn test_add_change_in_token_handler() {
-        let mut doc = Doc::new(String::from("Test example!"));
+        let mut doc = Doc::new(&String::from("Test example!"));
         doc.add_change_in_token_handler(2, String::from("cat"), None);
         assert_eq!(doc.changed_count, 1);
         assert_eq!(doc.get_augmented_string(), String::from("Test cat!"))
@@ -394,7 +396,7 @@ mod tests {
 
     #[test]
     fn test_add_change_outside_array_in_token_handler() {
-        let mut doc = Doc::new(String::from("Test example!"));
+        let mut doc = Doc::new(&String::from("Test example!"));
         doc.add_change_in_token_handler(7, String::from("cat"), None);
         assert_eq!(doc.changed_count, 0);
         assert_eq!(doc.get_augmented_string(), String::from("Test example!"))

@@ -333,7 +333,7 @@ mod tests {
             model: model,
         };
         let input_string = String::from("Пример строки для аугментации");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
         mock_aug.substitute(&mut doc, &mut rng);
         assert_eq!(doc.get_augmented_string(), input_string);
@@ -349,7 +349,7 @@ mod tests {
             model: model,
         };
         let input_string = String::from("Пример строки для аугментации");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
         mock_aug.substitute(&mut doc, &mut rng);
         assert_eq!(doc.get_augmented_string(), input_string);
@@ -365,7 +365,7 @@ mod tests {
             model: model,
         };
         let input_string = String::from("Пример ещё один");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
         mock_aug.substitute(&mut doc, &mut rng);
         assert_eq!(doc.get_augmented_string(), input_string);
@@ -381,7 +381,7 @@ mod tests {
             model: model,
         };
         let input_string = String::from("Апельсин гора стакан");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
         mock_aug.substitute(&mut doc, &mut rng);
         assert_ne!(

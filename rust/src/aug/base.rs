@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_filter_words_by_stopwords_with_spec() {
-        let mut doc = Doc::new(String::from("My example string!"));
+        let mut doc = Doc::new(&String::from("My example string!"));
         let stopwords = HashSet::from([String::from("example"), String::from("My")]);
         let mock_object = MockAugmentor {
             aug_params: AugCountParams::new(None, None, None),
@@ -137,7 +137,7 @@ mod tests {
 
     #[test]
     fn test_filter_words_by_stopwords_without_spec() {
-        let mut doc = Doc::new(String::from("My example string!!!"));
+        let mut doc = Doc::new(&String::from("My example string!!!"));
         let stopwords = HashSet::from([String::from("string")]);
         let mock_object = MockAugmentor {
             aug_params: AugCountParams::new(None, None, None),
@@ -157,7 +157,7 @@ mod tests {
 
     #[test]
     fn test_filter_words_by_minchar() {
-        let mut doc = Doc::new(String::from("Мой пример строки!!!"));
+        let mut doc = Doc::new(&String::from("Мой пример строки!!!"));
         let mock_object = MockAugmentor {
             aug_params: AugCountParams::new(None, None, None),
             min_chars: Some(4),
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn test_dont_filter_words_by_minchar() {
-        let mut doc = Doc::new(String::from("My example string!"));
+        let mut doc = Doc::new(&String::from("My example string!"));
         let mock_object = MockAugmentor {
             aug_params: AugCountParams::new(None, None, None),
             min_chars: None,
@@ -197,7 +197,7 @@ mod tests {
 
     #[test]
     fn test_sample_words_without_filtering_without_spec() {
-        let mut doc = Doc::new(String::from("My very useful example string!"));
+        let mut doc = Doc::new(&String::from("My very useful example string!"));
         let mock_object = MockAugmentor {
             aug_params: AugCountParams::new(None, None, None),
             min_chars: None,
@@ -212,7 +212,7 @@ mod tests {
 
     #[test]
     fn test_sample_zero() {
-        let mut doc = Doc::new(String::from("My very useful example string!"));
+        let mut doc = Doc::new(&String::from("My very useful example string!"));
         let mock_object = MockAugmentor {
             aug_params: AugCountParams::new(None, None, Some(0.0)),
             min_chars: None,
@@ -227,7 +227,7 @@ mod tests {
 
     #[test]
     fn test_sample_words_without_filtering_with_spec() {
-        let mut doc = Doc::new(String::from("My very useful example string!!!!!"));
+        let mut doc = Doc::new(&String::from("My very useful example string!!!!!"));
         let mock_object = MockAugmentor {
             aug_params: AugCountParams::new(None, None, None),
             min_chars: None,

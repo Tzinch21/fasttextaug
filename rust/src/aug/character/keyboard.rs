@@ -86,7 +86,7 @@ mod tests {
             Some(&stopwords),
         );
         let input_string = String::from("The quick brown fox jumps over the lazy dog .");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
         augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
@@ -117,7 +117,7 @@ mod tests {
             Some(&stopwords),
         );
         let input_string = String::from("Юнит-тест для тестов, тестов");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
         augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
@@ -148,7 +148,7 @@ mod tests {
             Some(&stopwords),
         );
         let input_string = String::from("the quick brown fox jumps over the lazy dog .");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
         augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
@@ -187,7 +187,7 @@ mod tests {
             Some(&stopwords),
         );
         let input_string = String::from("Пример строки для аугментации");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
         augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
@@ -224,7 +224,7 @@ mod tests {
             None,
         );
         let input_string = String::from("$$$$$$$!$@@$@$$@!!!!");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
         augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
@@ -260,7 +260,7 @@ mod tests {
             None,
         );
         let input_string = String::from("0351368213471238123512409");
-        let mut doc = Doc::new(input_string.clone());
+        let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
         augmentor.augment(&mut doc, &mut rng);
         let result = doc.get_augmented_string();

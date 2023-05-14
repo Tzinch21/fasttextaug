@@ -55,6 +55,33 @@ pub fn get_chars_len(input: &str) -> usize {
     counter
 }
 
+pub fn split_n_to_chunks(n: usize, num_chunks: usize) -> Vec<usize> {
+    let mut result = Vec::with_capacity(num_chunks);
+    let on_one_chunk = f64::ceil(n as f64 / num_chunks as f64) as usize;
+    let mut remains = n;
+    for _ in 0..num_chunks {
+        if remains < on_one_chunk {
+            result.push(remains);
+            remains = 0;
+        } else {
+            result.push(on_one_chunk);
+            remains -= on_one_chunk;
+        }
+    }
+    result
+}
+
+pub fn split_to_chunks_indexes(vec_size: usize, num_chunks: usize) -> Vec<(usize, usize)> {
+    let mut result = Vec::with_capacity(num_chunks);
+    let elems_in_chunk = split_n_to_chunks(vec_size, num_chunks);
+    let mut iter = 0;
+    for n_elem in elems_in_chunk {
+        result.push((iter, iter + n_elem));
+        iter += n_elem;
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -168,5 +195,63 @@ mod tests {
         let chars_count = get_chars_len(input);
         assert_eq!(input.len(), 20);
         assert_eq!(chars_count, 14)
+    }
+
+    #[test]
+    fn test_split_equal() {
+        let result = split_n_to_chunks(8, 4);
+        assert_eq!(result, vec![2, 2, 2, 2]);
+    }
+
+    #[test]
+    fn test_split_non_equal() {
+        let result = split_n_to_chunks(7, 3);
+        assert_eq!(result, vec![3, 3, 1]);
+    }
+
+    #[test]
+    fn test_split_less_than_one() {
+        let result = split_n_to_chunks(2, 5);
+        assert_eq!(result, vec![1, 1, 0, 0, 0]);
+    }
+
+    #[test]
+    fn test_split_zero() {
+        let result = split_n_to_chunks(0, 3);
+        assert_eq!(result, vec![0, 0, 0]);
+    }
+
+    #[test]
+    fn test_split_zero_chunks() {
+        let result = split_n_to_chunks(5, 0);
+        let expected: Vec<usize> = Vec::new();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_split_to_chunks_equal() {
+        let arr = vec![1, 2, 3, 4, 5, 6];
+        let chunk_idxs = split_to_chunks_indexes(arr.len(), 3);
+        assert_eq!(&arr[chunk_idxs[0].0..chunk_idxs[0].1], vec![1, 2]);
+        assert_eq!(&arr[chunk_idxs[1].0..chunk_idxs[1].1], vec![3, 4]);
+        assert_eq!(&arr[chunk_idxs[2].0..chunk_idxs[2].1], vec![5, 6]);
+    }
+
+    #[test]
+    fn test_split_to_chunks_non_equal() {
+        let arr = vec![1, 2, 3, 4, 5, 6, 7];
+        let chunk_idxs = split_to_chunks_indexes(arr.len(), 3);
+        assert_eq!(&arr[chunk_idxs[0].0..chunk_idxs[0].1], vec![1, 2, 3]);
+        assert_eq!(&arr[chunk_idxs[1].0..chunk_idxs[1].1], vec![4, 5, 6]);
+        assert_eq!(&arr[chunk_idxs[2].0..chunk_idxs[2].1], vec![7]);
+    }
+
+    #[test]
+    fn test_split_to_chunks_with_zeros() {
+        let arr = vec![1, 2];
+        let chunk_idxs = split_to_chunks_indexes(arr.len(), 3);
+        assert_eq!(&arr[chunk_idxs[0].0..chunk_idxs[0].1], vec![1]);
+        assert_eq!(&arr[chunk_idxs[1].0..chunk_idxs[1].1], vec![2]);
+        assert_eq!(&arr[chunk_idxs[2].0..chunk_idxs[2].1], Vec::<i32>::new());
     }
 }
