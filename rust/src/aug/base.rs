@@ -10,7 +10,6 @@ pub trait BaseAugmentor<T>
 where
     T: BaseModel,
 {
-    fn augment(&self, doc: &mut Doc, rng: &mut StdRng) -> ();
     fn get_action(&self) -> ();
     fn get_aug_params_word(&self) -> &AugCountParams;
     fn get_min_chars(&self) -> Option<usize> {
@@ -96,7 +95,6 @@ mod tests {
         use_special_chars: bool,
     }
     impl<'a> BaseAugmentor<MockModel> for MockAugmentor<'a> {
-        fn augment(&self, _doc: &mut Doc, _rng: &mut StdRng) -> () {}
         fn get_action(&self) -> () {}
         fn get_min_chars(&self) -> Option<usize> {
             self.min_chars

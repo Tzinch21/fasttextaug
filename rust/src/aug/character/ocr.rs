@@ -1,8 +1,5 @@
-use rand::rngs::StdRng;
-
 use super::super::{AugCountParams, BaseAugmentor};
 use super::CharacterAugmentor;
-use crate::doc::Doc;
 use crate::model::character::OcrModel;
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -34,9 +31,6 @@ impl OcrAugmentor {
 }
 
 impl BaseAugmentor<OcrModel> for OcrAugmentor {
-    fn augment(&self, doc: &mut Doc, rng: &mut StdRng) -> () {
-        self.substitute(doc, rng)
-    }
     fn get_action(&self) -> () {}
     fn get_aug_params_word(&self) -> &AugCountParams {
         &self.aug_params_word
@@ -61,7 +55,9 @@ impl CharacterAugmentor<OcrModel> for OcrAugmentor {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::doc::Doc;
     use crate::utils;
+    use rand::rngs::StdRng;
     use rand::SeedableRng;
 
     #[test]
@@ -83,7 +79,7 @@ mod tests {
         let input_string = String::from("The quick brown fox jumps over the lazy dog .");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(
@@ -113,7 +109,7 @@ mod tests {
         let input_string = String::from("Очень важный пример для аугментации");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(

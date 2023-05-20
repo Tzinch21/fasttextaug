@@ -1,8 +1,6 @@
 use super::super::{AugCountParams, BaseAugmentor};
 use super::CharacterAugmentor;
-use crate::doc::Doc;
 use crate::model::character::KeyboardModel;
-use rand::rngs::StdRng;
 use std::collections::HashSet;
 
 pub struct KeyboardAugmentor<'a> {
@@ -34,9 +32,6 @@ impl<'a> KeyboardAugmentor<'a> {
 }
 
 impl<'a> BaseAugmentor<KeyboardModel> for KeyboardAugmentor<'a> {
-    fn augment(&self, doc: &mut Doc, rng: &mut StdRng) -> () {
-        self.substitute(doc, rng)
-    }
     fn get_action(&self) -> () {}
     fn get_aug_params_word(&self) -> &AugCountParams {
         &self.aug_params_word
@@ -64,7 +59,9 @@ impl<'a> CharacterAugmentor<KeyboardModel> for KeyboardAugmentor<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::doc::Doc;
     use crate::utils;
+    use rand::rngs::StdRng;
     use rand::SeedableRng;
 
     #[test]
@@ -88,7 +85,7 @@ mod tests {
         let input_string = String::from("The quick brown fox jumps over the lazy dog .");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(
@@ -119,7 +116,7 @@ mod tests {
         let input_string = String::from("Юнит-тест для тестов, тестов");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::from_entropy();
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(
@@ -150,7 +147,7 @@ mod tests {
         let input_string = String::from("the quick brown fox jumps over the lazy dog .");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(
@@ -189,7 +186,7 @@ mod tests {
         let input_string = String::from("Пример строки для аугментации");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(
@@ -226,7 +223,7 @@ mod tests {
         let input_string = String::from("$$$$$$$!$@@$@$$@!!!!");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(
@@ -262,7 +259,7 @@ mod tests {
         let input_string = String::from("0351368213471238123512409");
         let mut doc = Doc::new(&input_string);
         let mut rng: StdRng = SeedableRng::seed_from_u64(42);
-        augmentor.augment(&mut doc, &mut rng);
+        augmentor.substitute(&mut doc, &mut rng);
         let result = doc.get_augmented_string();
         assert_ne!(result, input_string);
         assert_eq!(

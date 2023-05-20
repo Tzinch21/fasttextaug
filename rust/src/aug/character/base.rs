@@ -134,7 +134,6 @@ mod tests {
         model: MockModel,
     }
     impl BaseAugmentor<MockModel> for MockAugmentor {
-        fn augment(&self, _doc: &mut Doc, _rng: &mut StdRng) -> () {}
         fn get_action(&self) -> () {}
         fn get_aug_params_word(&self) -> &AugCountParams {
             &self.aug_params_word
