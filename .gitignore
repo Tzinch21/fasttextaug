@@ -6,3 +6,4 @@ rust/target
 python/fasttextaug/*.abi3.so
 *.vec
 **/.DS_Store
+benchmarks/data/*
