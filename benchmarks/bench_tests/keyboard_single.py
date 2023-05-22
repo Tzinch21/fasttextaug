@@ -17,16 +17,17 @@ INPUT_TEXT_SINGLE_STR = (
 if __name__ == "__main__":
     bench_result = {}
     REPEATS = 3
-    number_my_lib = (100_000, 100_000, 10_000, 1000, 100)
-    number_exist_lib = (10_000, 1000, 100, 100, 100)
+    number_my_lib = (10_000, 100_00, 1000, 100, 100)
+    number_exist_lib = (1000, 100, 100, 10, 10)
 
     for flags in itertools.product([True, False], repeat=3):
-        bench_result[flags] = {}
+        str_flags = str(flags)
+        bench_result[str_flags] = {}
         special_char, numeric, uppercase = flags
 
         for idx, n_size in enumerate((1, 10, 100, 1_000, 10_000)):
-            bench_result[flags][n_size] = {}
-            bench_result[flags][n_size]["n_size"] = n_size
+            bench_result[str_flags][n_size] = {}
+            bench_result[str_flags][n_size]["n_size"] = n_size
 
             my_lib_aug = fau.character.KeyboardAug(
                 include_special_char=special_char,
@@ -50,13 +51,13 @@ if __name__ == "__main__":
                 number=number_exist_lib[idx],
             )
 
-            bench_result[flags][n_size]["fasttextaug"] = [i / number_my_lib[idx] for i in my_bench]
-            bench_result[flags][n_size]["fasttextaug_repeats"] = REPEATS
-            bench_result[flags][n_size]["fasttextaug_number"] = number_my_lib[idx]
+            bench_result[str_flags][n_size]["fasttextaug"] = [i / number_my_lib[idx] for i in my_bench]
+            bench_result[str_flags][n_size]["fasttextaug_repeats"] = REPEATS
+            bench_result[str_flags][n_size]["fasttextaug_number"] = number_my_lib[idx]
 
-            bench_result[flags][n_size]["nlpaug"] = [i / number_exist_lib[idx] for i in lib_bench]
-            bench_result[flags][n_size]["nlpaug_repeats"] = REPEATS
-            bench_result[flags][n_size]["nlpaug_number"] = number_exist_lib[idx]
+            bench_result[str_flags][n_size]["nlpaug"] = [i / number_exist_lib[idx] for i in lib_bench]
+            bench_result[str_flags][n_size]["nlpaug_repeats"] = REPEATS
+            bench_result[str_flags][n_size]["nlpaug_number"] = number_exist_lib[idx]
 
     with open("/reports/keyboard/keyboard_single.json", "w") as file:
         print(json.dumps(bench_result), file=file)
