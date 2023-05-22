@@ -2,36 +2,38 @@ use super::super::{AugCountParams, BaseAugmentor};
 use super::CharacterAugmentor;
 use crate::model::character::KeyboardModel;
 use std::collections::HashSet;
+use std::sync::Arc;
 
-pub struct KeyboardAugmentor<'a> {
+pub struct KeyboardAugmentor {
     aug_params_char: AugCountParams,
     aug_params_word: AugCountParams,
     min_chars: Option<usize>,
-    model: &'a KeyboardModel,
-    stopwords: Option<&'a HashSet<String>>,
+    model: Arc<KeyboardModel>,
+    stopwords: Arc<Option<HashSet<String>>>,
     use_special_chars: bool,
 }
 
-impl<'a> KeyboardAugmentor<'a> {
+impl KeyboardAugmentor {
     pub fn new(
         aug_params_char: AugCountParams,
         aug_params_word: AugCountParams,
         min_chars: Option<usize>,
-        model: &'a KeyboardModel,
-        stopwords: Option<&'a HashSet<String>>,
+        model: Arc<KeyboardModel>,
+        stopwords: Arc<Option<HashSet<String>>>,
     ) -> Self {
+        let use_special_chars = model.get_allow_special_char();
         KeyboardAugmentor {
             aug_params_char,
             aug_params_word,
             min_chars,
             model,
             stopwords,
-            use_special_chars: model.get_allow_special_char(),
+            use_special_chars,
         }
     }
 }
 
-impl<'a> BaseAugmentor<KeyboardModel> for KeyboardAugmentor<'a> {
+impl BaseAugmentor<KeyboardModel> for KeyboardAugmentor {
     fn get_action(&self) -> () {}
     fn get_aug_params_word(&self) -> &AugCountParams {
         &self.aug_params_word
@@ -40,17 +42,17 @@ impl<'a> BaseAugmentor<KeyboardModel> for KeyboardAugmentor<'a> {
         self.min_chars
     }
     fn get_model(&self) -> &KeyboardModel {
-        self.model
+        self.model.as_ref()
     }
     fn get_stopwords(&self) -> Option<&HashSet<String>> {
-        self.stopwords
+        self.stopwords.as_ref().as_ref()
     }
     fn get_use_special_chars(&self) -> bool {
         self.use_special_chars
     }
 }
 
-impl<'a> CharacterAugmentor<KeyboardModel> for KeyboardAugmentor<'a> {
+impl CharacterAugmentor<KeyboardModel> for KeyboardAugmentor {
     fn get_aug_params_char(&self) -> &AugCountParams {
         &self.aug_params_char
     }
@@ -73,14 +75,18 @@ mod tests {
             String::from("test_res/keyboard_en.json"),
         );
         model.load_model();
-        let stopwords = HashSet::from([String::from("fox"), String::from("The")]);
+        let arc_model = Arc::new(model);
+        let stopwords = Arc::new(Some(HashSet::from([
+            String::from("fox"),
+            String::from("The"),
+        ])));
         // KeyboardAugmentor::new(aug_params_char, aug_params_word, min_chars, &model, stopwords)
         let augmentor = KeyboardAugmentor::new(
             AugCountParams::new(Some(1), Some(5), None),
             AugCountParams::new(Some(2), Some(6), None),
             Some(3),
-            &model,
-            Some(&stopwords),
+            Arc::clone(&arc_model),
+            Arc::clone(&stopwords),
         );
         let input_string = String::from("The quick brown fox jumps over the lazy dog .");
         let mut doc = Doc::new(&input_string);
@@ -105,13 +111,17 @@ mod tests {
             String::from("test_res/keyboard_ru.json"),
         );
         model.load_model();
-        let stopwords = HashSet::from([String::from("для"), String::from("Юнит")]);
+        let arc_model = Arc::new(model);
+        let stopwords = Arc::new(Some(HashSet::from([
+            String::from("для"),
+            String::from("Юнит"),
+        ])));
         let augmentor = KeyboardAugmentor::new(
             AugCountParams::new(Some(1), Some(5), None),
             AugCountParams::new(Some(2), Some(6), None),
             Some(3),
-            &model,
-            Some(&stopwords),
+            Arc::clone(&arc_model),
+            Arc::clone(&stopwords),
         );
         let input_string = String::from("Юнит-тест для тестов, тестов");
         let mut doc = Doc::new(&input_string);
@@ -136,13 +146,17 @@ mod tests {
             String::from("test_res/keyboard_en.json"),
         );
         model.load_model();
-        let stopwords = HashSet::from([String::from("fox"), String::from("the")]);
+        let arc_model = Arc::new(model);
+        let stopwords = Arc::new(Some(HashSet::from([
+            String::from("fox"),
+            String::from("the"),
+        ])));
         let augmentor = KeyboardAugmentor::new(
             AugCountParams::new(Some(1), Some(5), None),
             AugCountParams::new(Some(2), Some(6), None),
             Some(3),
-            &model,
-            Some(&stopwords),
+            Arc::clone(&arc_model),
+            Arc::clone(&stopwords),
         );
         let input_string = String::from("the quick brown fox jumps over the lazy dog .");
         let mut doc = Doc::new(&input_string);
@@ -175,13 +189,14 @@ mod tests {
             String::from("test_res/keyboard_ru.json"),
         );
         model.load_model();
-        let stopwords = HashSet::from([String::from("Пример")]);
+        let arc_model = Arc::new(model);
+        let stopwords = Arc::new(Some(HashSet::from([String::from("Пример")])));
         let augmentor = KeyboardAugmentor::new(
             AugCountParams::new(Some(1), Some(5), None),
             AugCountParams::new(Some(2), Some(6), None),
             Some(3),
-            &model,
-            Some(&stopwords),
+            Arc::clone(&arc_model),
+            Arc::clone(&stopwords),
         );
         let input_string = String::from("Пример строки для аугментации");
         let mut doc = Doc::new(&input_string);
@@ -213,12 +228,13 @@ mod tests {
             String::from("test_res/keyboard_en.json"),
         );
         model.load_model();
+        let arc_model = Arc::new(model);
         let augmentor = KeyboardAugmentor::new(
             AugCountParams::new(Some(3), Some(5), None),
             AugCountParams::new(Some(2), Some(6), None),
             None,
-            &model,
-            None,
+            Arc::clone(&arc_model),
+            Arc::new(None),
         );
         let input_string = String::from("$$$$$$$!$@@$@$$@!!!!");
         let mut doc = Doc::new(&input_string);
@@ -249,12 +265,13 @@ mod tests {
             String::from("test_res/keyboard_en.json"),
         );
         model.load_model();
+        let arc_model = Arc::new(model);
         let augmentor = KeyboardAugmentor::new(
             AugCountParams::new(Some(1), Some(5), None),
             AugCountParams::new(Some(2), Some(6), None),
             None,
-            &model,
-            None,
+            Arc::clone(&arc_model),
+            Arc::new(None),
         );
         let input_string = String::from("0351368213471238123512409");
         let mut doc = Doc::new(&input_string);
