@@ -1,5 +1,5 @@
 use crate::aug::character::OcrAugmentor;
-use crate::aug::{character::CharacterAugmentor, AugCountParams};
+use crate::aug::{AugCountParams, BaseAugmentor};
 use crate::doc::Doc;
 use crate::model::character::OcrModel;
 use crate::utils;
@@ -62,7 +62,7 @@ impl RustOCRAugmentor {
         }
     }
 
-    fn substitute_string_single_thread(&self, input_string: String, n: usize) -> Vec<String> {
+    fn augment_string_single_thread(&self, input_string: String, n: usize) -> Vec<String> {
         let mut rng: StdRng = SeedableRng::from_entropy();
         let mut result = Vec::with_capacity(n);
         let mut doc = Doc::new(&input_string);
@@ -75,14 +75,14 @@ impl RustOCRAugmentor {
         );
 
         for _ in 0..n {
-            augmentor.substitute(&mut doc, &mut rng);
+            augmentor.augment(&mut doc, &mut rng);
             result.push(doc.get_augmented_string());
             doc.set_to_original();
         }
         result
     }
 
-    fn substitute_string_multi_thread(
+    fn augment_string_multi_thread(
         &self,
         input_string: String,
         n: usize,
@@ -114,7 +114,7 @@ impl RustOCRAugmentor {
                     arc_stopword_ref,
                 );
                 for _ in 0..n_on_thread {
-                    augmentor.substitute(&mut doc, &mut rng);
+                    augmentor.augment(&mut doc, &mut rng);
                     thread_res.push(doc.get_augmented_string());
                     doc.set_to_original();
                 }
@@ -129,7 +129,7 @@ impl RustOCRAugmentor {
         result
     }
 
-    fn substitute_list_single_thread(&self, input_list: Vec<String>) -> Vec<String> {
+    fn augment_list_single_thread(&self, input_list: Vec<String>) -> Vec<String> {
         let mut rng: StdRng = SeedableRng::from_entropy();
         let mut result = Vec::with_capacity(input_list.len());
         let augmentor = OcrAugmentor::new(
@@ -141,17 +141,13 @@ impl RustOCRAugmentor {
         );
         for input_str in input_list {
             let mut doc = Doc::new(&input_str);
-            augmentor.substitute(&mut doc, &mut rng);
+            augmentor.augment(&mut doc, &mut rng);
             result.push(doc.get_augmented_string());
         }
         result
     }
 
-    fn substitute_list_multi_thread(
-        &self,
-        input_list: Vec<String>,
-        n_threads: usize,
-    ) -> Vec<String> {
+    fn augment_list_multi_thread(&self, input_list: Vec<String>, n_threads: usize) -> Vec<String> {
         let mut result = Vec::with_capacity(input_list.len());
         let arc_input_list = Arc::new(input_list);
         let chunk_indexes = utils::split_to_chunks_indexes(arc_input_list.len(), n_threads);
@@ -180,7 +176,7 @@ impl RustOCRAugmentor {
                     // [left_idx..right_idx]
                     for input in &arc_input_list_ref.as_ref()[left_idx..right_idx] {
                         let mut doc = Doc::new(input);
-                        augmentor.substitute(&mut doc, &mut rng);
+                        augmentor.augment(&mut doc, &mut rng);
                         thread_res.push(doc.get_augmented_string());
                     }
 

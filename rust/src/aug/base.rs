@@ -6,11 +6,20 @@ use super::AugCountParams;
 use crate::doc::{Doc, TokenHandler};
 use crate::model::BaseModel;
 
+#[derive(Clone, Copy)]
+pub enum Action {
+    Insert,
+    Substitute,
+    Delete,
+    Swap,
+}
+
 pub trait BaseAugmentor<T>
 where
     T: BaseModel,
 {
-    fn get_action(&self) -> ();
+    fn augment(&self, doc: &mut Doc, rng: &mut StdRng) -> ();
+    fn get_action(&self) -> Action;
     fn get_aug_params_word(&self) -> &AugCountParams;
     fn get_min_chars(&self) -> Option<usize> {
         None
@@ -95,7 +104,10 @@ mod tests {
         use_special_chars: bool,
     }
     impl<'a> BaseAugmentor<MockModel> for MockAugmentor<'a> {
-        fn get_action(&self) -> () {}
+        fn augment(&self, _: &mut Doc, _: &mut StdRng) -> () {}
+        fn get_action(&self) -> Action {
+            Action::Substitute
+        }
         fn get_min_chars(&self) -> Option<usize> {
             self.min_chars
         }

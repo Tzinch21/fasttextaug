@@ -1,8 +1,7 @@
-use crate::aug::character::KeyboardAugmentor;
-use crate::aug::AugCountParams;
-use crate::aug::BaseAugmentor;
+use crate::aug::character::{CharacterAugmentor, RandomCharAugmentor};
+use crate::aug::{Action, AugCountParams, BaseAugmentor};
 use crate::doc::Doc;
-use crate::model::character::KeyboardModel;
+use crate::model::character::RandomCharModel;
 use crate::utils;
 use pyo3::prelude::*;
 use rand::{rngs::StdRng, SeedableRng};
@@ -11,15 +10,17 @@ use std::sync::Arc;
 use std::thread;
 
 #[pyclass]
-pub struct RustKeyboardAugmentor {
+pub struct RustRandomCharAugmentor {
+    action: Action,
     aug_char_params: AugCountParams,
     aug_word_params: AugCountParams,
-    model: Arc<KeyboardModel>,
+    model: Arc<RandomCharModel>,
     stopwords: Arc<Option<HashSet<String>>>,
     min_char: Option<usize>,
+    swapmode: String,
 }
 
-impl RustKeyboardAugmentor {
+impl RustRandomCharAugmentor {
     fn get_aug_char_params(&self) -> AugCountParams {
         self.aug_char_params.clone()
     }
@@ -31,44 +32,69 @@ impl RustKeyboardAugmentor {
     fn get_min_chars(&self) -> Option<usize> {
         self.min_char
     }
+
+    fn get_swapmode(&self) -> String {
+        self.swapmode.clone()
+    }
 }
 
 #[pymethods]
-impl RustKeyboardAugmentor {
+impl RustRandomCharAugmentor {
     #[new]
     #[pyo3(signature = (
-        aug_min_char, aug_max_char, aug_p_char,
+        action, aug_min_char, aug_max_char, aug_p_char,
         aug_min_word, aug_max_word, aug_p_word,
-        stopwords, include_special_char, include_numeric,
-        include_upper_case, min_char, model_path)
+        include_upper_case, include_lower_case,
+        include_numeric, include_special_char, lang,
+        stopwords, min_char, swap_mode, spec_char,
+        candidates)
     )]
     fn new(
+        action: String,
         aug_min_char: Option<usize>,
         aug_max_char: Option<usize>,
         aug_p_char: Option<f32>,
         aug_min_word: Option<usize>,
         aug_max_word: Option<usize>,
         aug_p_word: Option<f32>,
-        stopwords: Option<HashSet<String>>,
-        include_special_char: bool,
-        include_numeric: bool,
         include_upper_case: bool,
+        include_lower_case: bool,
+        include_numeric: bool,
+        include_special_char: bool,
+        lang: String,
+        stopwords: Option<HashSet<String>>,
         min_char: Option<usize>,
-        model_path: String,
+        swap_mode: String,
+        spec_char: Option<String>,
+        candidates: Option<Vec<String>>,
     ) -> Self {
-        let mut model = KeyboardModel::new(
-            include_special_char,
-            include_numeric,
-            include_upper_case,
-            model_path,
-        );
+        let mut model = match candidates {
+            Some(values) => RandomCharModel::from_candidates(values),
+            None => RandomCharModel::new(
+                include_upper_case,
+                include_lower_case,
+                include_special_char,
+                include_numeric,
+                &lang,
+                spec_char,
+            ),
+        };
         model.load_model();
-        RustKeyboardAugmentor {
+        let action = match &action[..] {
+            "insert" => Action::Insert,
+            "substitute" => Action::Substitute,
+            "delete" => Action::Delete,
+            "swap" => Action::Swap,
+            _ => Action::Substitute,
+        };
+        RustRandomCharAugmentor {
+            action,
             aug_char_params: AugCountParams::new(aug_min_char, aug_max_char, aug_p_char),
             aug_word_params: AugCountParams::new(aug_min_word, aug_max_word, aug_p_word),
             model: Arc::new(model),
             stopwords: Arc::new(stopwords),
             min_char: min_char,
+            swapmode: swap_mode,
         }
     }
 
@@ -76,12 +102,14 @@ impl RustKeyboardAugmentor {
         let mut rng: StdRng = SeedableRng::from_entropy();
         let mut result = Vec::with_capacity(n);
         let mut doc = Doc::new(&input_string);
-        let augmentor = KeyboardAugmentor::new(
+        let augmentor = RandomCharAugmentor::new(
+            self.action,
             self.get_aug_char_params(),
             self.get_aug_word_params(),
             self.get_min_chars(),
             Arc::clone(&self.model),
             Arc::clone(&self.stopwords),
+            self.get_swapmode(),
         );
 
         for _ in 0..n {
@@ -105,23 +133,27 @@ impl RustKeyboardAugmentor {
 
         for idx in 0..n_threads {
             let n_on_thread = n_on_threads[idx];
+            let action_cloned = self.action.clone();
             let aug_params_char_cloned = self.get_aug_char_params();
             let aug_params_word_cloned = self.get_aug_word_params();
             let min_chars_cloned = self.get_min_chars();
             let arc_input_string_ref = Arc::clone(&arc_input_string);
             let arc_model_ref = Arc::clone(&self.model);
             let arc_stopword_ref = Arc::clone(&self.stopwords);
+            let swapmode_cloned = self.get_swapmode();
 
             let thread_handle = thread::spawn(move || {
                 let mut rng: StdRng = SeedableRng::from_entropy();
                 let mut thread_res = Vec::with_capacity(n_on_thread);
                 let mut doc = Doc::from_arc(arc_input_string_ref);
-                let augmentor = KeyboardAugmentor::new(
+                let augmentor = RandomCharAugmentor::new(
+                    action_cloned,
                     aug_params_char_cloned,
                     aug_params_word_cloned,
                     min_chars_cloned,
                     arc_model_ref,
                     arc_stopword_ref,
+                    swapmode_cloned,
                 );
                 for _ in 0..n_on_thread {
                     augmentor.augment(&mut doc, &mut rng);
@@ -142,12 +174,14 @@ impl RustKeyboardAugmentor {
     fn augment_list_single_thread(&self, input_list: Vec<String>) -> Vec<String> {
         let mut rng: StdRng = SeedableRng::from_entropy();
         let mut result = Vec::with_capacity(input_list.len());
-        let augmentor = KeyboardAugmentor::new(
+        let augmentor = RandomCharAugmentor::new(
+            self.action,
             self.get_aug_char_params(),
             self.get_aug_word_params(),
             self.get_min_chars(),
             Arc::clone(&self.model),
             Arc::clone(&self.stopwords),
+            self.get_swapmode(),
         );
         for input_str in input_list {
             let mut doc = Doc::new(&input_str);
@@ -166,27 +200,31 @@ impl RustKeyboardAugmentor {
         for idx in 0..n_threads {
             let (left_idx, right_idx) = chunk_indexes[idx];
             if left_idx != right_idx {
+                let action_cloned = self.action.clone();
                 let aug_params_char_cloned = self.get_aug_char_params();
                 let aug_params_word_cloned = self.get_aug_word_params();
                 let min_chars_cloned = self.get_min_chars();
                 let arc_model_ref = Arc::clone(&self.model);
                 let arc_stopword_ref = Arc::clone(&self.stopwords);
                 let arc_input_list_ref = Arc::clone(&arc_input_list);
+                let swapmode_cloned = self.get_swapmode();
 
                 let thread_handle = thread::spawn(move || {
                     let mut rng: StdRng = SeedableRng::from_entropy();
                     let mut thread_res = Vec::with_capacity(right_idx - left_idx);
-                    let augmentor = KeyboardAugmentor::new(
+                    let augmentor = RandomCharAugmentor::new(
+                        action_cloned,
                         aug_params_char_cloned,
                         aug_params_word_cloned,
                         min_chars_cloned,
                         arc_model_ref,
                         arc_stopword_ref,
+                        swapmode_cloned,
                     );
                     // [left_idx..right_idx]
                     for input in &arc_input_list_ref.as_ref()[left_idx..right_idx] {
                         let mut doc = Doc::new(input);
-                        augmentor.augment(&mut doc, &mut rng);
+                        augmentor.substitute(&mut doc, &mut rng);
                         thread_res.push(doc.get_augmented_string());
                     }
 

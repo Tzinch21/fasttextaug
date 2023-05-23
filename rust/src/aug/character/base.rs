@@ -80,6 +80,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::super::super::Action;
     use super::*;
     use crate::model::{BaseModel, Mapping};
     use crate::utils;
@@ -134,7 +135,10 @@ mod tests {
         model: MockModel,
     }
     impl BaseAugmentor<MockModel> for MockAugmentor {
-        fn get_action(&self) -> () {}
+        fn augment(&self, _: &mut Doc, _: &mut StdRng) -> () {}
+        fn get_action(&self) -> Action {
+            Action::Substitute
+        }
         fn get_aug_params_word(&self) -> &AugCountParams {
             &self.aug_params_word
         }

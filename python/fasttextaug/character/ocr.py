@@ -23,7 +23,7 @@ class OcrAug:
             lang = "en" if lang is None else lang
             dict_of_path = f"{dir_path}/{lang}.json"
 
-        self._rust_ocr_aug = RustOCRAugmentor(
+        self._rust_aug = RustOCRAugmentor(
             aug_min_char=aug_char_min,
             aug_max_char=aug_char_max,
             aug_p_char=aug_char_p,
@@ -38,12 +38,12 @@ class OcrAug:
     def augment(self, data: Union[List[str], str], n=1, num_thread=1) -> List[str]:
         if isinstance(data, list):
             if num_thread == 1:
-                aug_result = self._rust_ocr_aug.substitute_list_single_thread(data)
+                aug_result = self._rust_aug.augment_list_single_thread(data)
             else:
-                aug_result = self._rust_ocr_aug.substitute_list_multi_thread(data, num_thread)
+                aug_result = self._rust_aug.augment_list_multi_thread(data, num_thread)
         else:
             if num_thread == 1:
-                aug_result = self._rust_ocr_aug.substitute_string_single_thread(data, n)
+                aug_result = self._rust_aug.augment_string_single_thread(data, n)
             else:
-                aug_result = self._rust_ocr_aug.substitute_string_multi_thread(data, n, num_thread)
+                aug_result = self._rust_aug.augment_string_multi_thread(data, n, num_thread)
         return aug_result

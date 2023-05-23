@@ -1,4 +1,4 @@
-use super::super::{AugCountParams, BaseAugmentor};
+use super::super::{Action, AugCountParams, BaseAugmentor};
 use super::CharacterAugmentor;
 use crate::model::character::KeyboardModel;
 use std::collections::HashSet;
@@ -34,7 +34,12 @@ impl KeyboardAugmentor {
 }
 
 impl BaseAugmentor<KeyboardModel> for KeyboardAugmentor {
-    fn get_action(&self) -> () {}
+    fn augment(&self, doc: &mut crate::doc::Doc, rng: &mut rand::rngs::StdRng) -> () {
+        self.substitute(doc, rng)
+    }
+    fn get_action(&self) -> Action {
+        Action::Substitute
+    }
     fn get_aug_params_word(&self) -> &AugCountParams {
         &self.aug_params_word
     }
