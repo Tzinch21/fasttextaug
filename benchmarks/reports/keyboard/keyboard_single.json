@@ -1,0 +1,698 @@
+{
+    "(True, True, True)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.273313380079344e-05,
+                1.2853747900226153e-05,
+                1.2808331800624727e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.00024725231699994766,
+                0.0002439020940073533,
+                0.00024335977100417949
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.31377413996961e-05,
+                8.302658129978226e-05,
+                8.271089360059704e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.0023873647299478763,
+                0.0023906629600969607,
+                0.0023791862800135277
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0007772448129981058,
+                0.0007783262450102484,
+                0.000773536274995422
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.023838077529944712,
+                0.023738777929975186,
+                0.02377828306009178
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.007686663489876082,
+                0.007706236489902949,
+                0.007703827719960827
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.23762744050036416,
+                0.23833925620128865,
+                0.23961271769949236
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.07882064119999996,
+                0.0787515209200501,
+                0.07876324301003479
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.370892761601135,
+                2.3730601069997648,
+                2.3737965254011213
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    },
+    "(True, True, False)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.2849587999517098e-05,
+                1.2511478300439193e-05,
+                1.2658783499500714e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.00023977558501064777,
+                0.00023856673399859574,
+                0.00023830372300290037
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.240542190033011e-05,
+                8.25944394004182e-05,
+                8.23162136002793e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.0023685924100573176,
+                0.0023863937900750897,
+                0.0023805150600674095
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0007678506700030994,
+                0.0007695383639947977,
+                0.0007726986979978392
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.02359503648011014,
+                0.023573254639923106,
+                0.02349257719004527
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.007700621179974405,
+                0.007634021700068843,
+                0.0076433402800466866
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.2372941831999924,
+                0.23520492060051765,
+                0.23652315770013957
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.07837099583004602,
+                0.07835170931008179,
+                0.07810788172995671
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.3543844951011126,
+                2.3550129518989706,
+                2.3559227656005532
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    },
+    "(True, False, True)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.314418139954796e-05,
+                1.3402651400247124e-05,
+                1.328300669993041e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.00024087337899254634,
+                0.0002408544339996297,
+                0.00024261317400669214
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.134404080046807e-05,
+                8.199079449987039e-05,
+                8.189735040068627e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.0023623264899651987,
+                0.0023550369100121316,
+                0.0023616990899608934
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0007658844490069896,
+                0.0007686603969923454,
+                0.000775294776991359
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.023498972119996325,
+                0.023473441219975938,
+                0.023497506879939466
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.007700576179922791,
+                0.00764903265007888,
+                0.007665441870049108
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.2351984885011916,
+                0.23575541799946223,
+                0.2359150297008455
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.07835770302001038,
+                0.07816817238999647,
+                0.07815228191990173
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.362121587699221,
+                2.3608433790999697,
+                2.3589770235004837
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    },
+    "(True, False, False)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.2663060899649282e-05,
+                1.2478088999341708e-05,
+                1.2806550500681624e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.00024349680999876,
+                0.00024026975300512276,
+                0.00023916131700389088
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.202923109929543e-05,
+                8.232283529941923e-05,
+                8.210938480042386e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.00236404504001257,
+                0.0023740276000171435,
+                0.0023612144800426904
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0007823128629970597,
+                0.0007778386510035489,
+                0.0007777935690101004
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.023405198129912607,
+                0.02349827896003262,
+                0.023466125220002142
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.007691261649888474,
+                0.007741063769935863,
+                0.007686880819965154
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.23475627359875945,
+                0.2349171602007118,
+                0.2343327403010335
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.07886968480001087,
+                0.07875961912999628,
+                0.07883659439001349
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.343165536799643,
+                2.460176841700741,
+                2.4370013841005855
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    },
+    "(False, True, True)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.4003491000039503e-05,
+                1.4000950400077271e-05,
+                1.4323766299639828e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.00025679594400571657,
+                0.0002529806579987053,
+                0.00025091626799257936
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.513926500017988e-05,
+                8.530780619912549e-05,
+                8.51371258002473e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.0024449506000382825,
+                0.0024458853699616157,
+                0.0024460862400883343
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0007988857510063099,
+                0.0007977476490050321,
+                0.0007990997940069065
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.024417749600106616,
+                0.024522931300016353,
+                0.024546349510055732
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.008069157209974946,
+                0.008108365340012825,
+                0.008078444669954478
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.2452559430996189,
+                0.24571606300014537,
+                0.24576829880097648
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.08108402030004072,
+                0.08167196335998597,
+                0.08074189238002873
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.464313893800136,
+                2.4615287740991336,
+                2.467877239600057
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    },
+    "(False, True, False)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.331555409997236e-05,
+                1.3200148699979763e-05,
+                1.3268996799888556e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.0002510021990019595,
+                0.0002511028089938918,
+                0.0002505419209919637
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.636145899945404e-05,
+                8.627117020078004e-05,
+                8.630123710026965e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.002480564199941,
+                0.0024819839000701904,
+                0.0024799302899918985
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0008119263010012219,
+                0.0008159289290051674,
+                0.0008140632050053682
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.02471285136998631,
+                0.024695985509897583,
+                0.024699025440058905
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.008104675960057648,
+                0.008105976799997734,
+                0.00812166730989702
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.24746314320072998,
+                0.2471771461001481,
+                0.2467778421007097
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.08132184835994849,
+                0.0812647542898776,
+                0.0811094963400683
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.456945519900182,
+                2.4527211330001593,
+                2.4487851111989585
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    },
+    "(False, False, True)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.3459923100890592e-05,
+                1.3655567000387236e-05,
+                1.3501758700294886e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.000250113510992378,
+                0.0002498426370002562,
+                0.0002494390240026405
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.566701800009469e-05,
+                8.556162729946663e-05,
+                8.583843749947846e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.002442518969910452,
+                0.0024302996099868322,
+                0.002432020580017706
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0008032100739947055,
+                0.0008041053899942199,
+                0.0008044295110012172
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.024330579160014167,
+                0.024327470120042563,
+                0.024262332259968388
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.008021270600002026,
+                0.00805447995007853,
+                0.00803481394003029
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.24386288230016362,
+                0.24396462790027726,
+                0.2454800827006693
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.08054045994998887,
+                0.08044671513009234,
+                0.08046900159009965
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.4345765617996222,
+                2.436201340099797,
+                2.4369983128999593
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    },
+    "(False, False, False)": {
+        "1": {
+            "n_size": 1,
+            "fasttextaug": [
+                1.3169934799952898e-05,
+                1.3081464399874676e-05,
+                1.3114761500037274e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.0002481082559970673,
+                0.00024710686699836517,
+                0.00024767361699196046
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 1000
+        },
+        "10": {
+            "n_size": 10,
+            "fasttextaug": [
+                8.541934719978599e-05,
+                8.543228430062299e-05,
+                8.568203049944714e-05
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 10000,
+            "nlpaug": [
+                0.0024662317700858694,
+                0.0024793760299507994,
+                0.0024521391700545792
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "100": {
+            "n_size": 100,
+            "fasttextaug": [
+                0.0008039752769982442,
+                0.000803358199991635,
+                0.0008027620099892375
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 1000,
+            "nlpaug": [
+                0.024326834359962957,
+                0.024295068869978422,
+                0.024300621909933397
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 100
+        },
+        "1000": {
+            "n_size": 1000,
+            "fasttextaug": [
+                0.0080489623399626,
+                0.008046160569938366,
+                0.008057323550019646
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                0.24298269669961883,
+                0.24371399359952192,
+                0.24328312980069314
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        },
+        "10000": {
+            "n_size": 10000,
+            "fasttextaug": [
+                0.0806879570199817,
+                0.08066845288005425,
+                0.08066020818994729
+            ],
+            "fasttextaug_repeats": 3,
+            "fasttextaug_number": 100,
+            "nlpaug": [
+                2.4290926876012238,
+                2.4289095979009288,
+                2.4287691947989516
+            ],
+            "nlpaug_repeats": 3,
+            "nlpaug_number": 10
+        }
+    }
+}
