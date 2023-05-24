@@ -41,7 +41,5 @@ if __name__ == "__main__":
             bench_result[num_thread]["nlpaug_number"] = NUMBER_THEIR_LIB
             bench_result[num_thread]["nlpaug_repeats"] = REPEATS
 
-        print(f"Did ocr_list - {num_thread}")
-
     with open("/reports/ocr/ocr_list.json", "w") as file:
         print(json.dumps(bench_result), file=file)

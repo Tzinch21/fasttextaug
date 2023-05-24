@@ -37,7 +37,9 @@ if __name__ == "__main__":
                 repeat=REPEATS,
                 number=NUMBER_MY_LIB,
             )
-            bench_result[str_flags][num_thread]["fasttextaug"] = [i / NUMBER_MY_LIB for i in my_bench]
+            bench_result[str_flags][num_thread]["fasttextaug"] = [
+                i / NUMBER_MY_LIB for i in my_bench
+            ]
             bench_result[str_flags][num_thread]["fasttextaug_number"] = NUMBER_MY_LIB
             bench_result[str_flags][num_thread]["fasttextaug_repeats"] = REPEATS
 
@@ -52,8 +54,6 @@ if __name__ == "__main__":
                 ]
                 bench_result[str_flags][num_thread]["nlpaug_number"] = NUMBER_THEIR_LIB
                 bench_result[str_flags][num_thread]["nlpaug_repeats"] = REPEATS
-
-            print(f"Did keyboard_list - {num_thread}")
 
     with open("/reports/keyboard/keyboard_list.json", "w") as file:
         print(json.dumps(bench_result), file=file)

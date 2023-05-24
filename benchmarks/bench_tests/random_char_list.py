@@ -46,7 +46,5 @@ if __name__ == "__main__":
                 bench_result[action][num_thread]["nlpaug_number"] = NUMBER_THEIR_LIB
                 bench_result[action][num_thread]["nlpaug_repeats"] = REPEATS
 
-            print(f"Did list - {num_thread}")
-
     with open("/reports/random_char/random_char_list.json", "w") as file:
         print(json.dumps(bench_result), file=file)
