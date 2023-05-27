@@ -4,7 +4,7 @@ from functools import partial
 
 import nlpaug.augmenter.char as nac
 
-import fasttextaug as fau
+import fasttextaug.augmenter.char as fac
 
 INPUT_TEXT_SINGLE_STR = (
     "This is the best tasting stevia powder I've tried. "
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         bench_result[n_size] = {}
         bench_result[n_size]["n_size"] = n_size
 
-        my_lib_ocr_aug = fau.character.OcrAug()
+        my_lib_ocr_aug = fac.OcrAug()
         exist_lib_ocr_aug = nac.OcrAug()
 
         my_bench = timeit.repeat(

@@ -3,6 +3,7 @@ use super::token_handler::TokenHandler;
 use std::sync::Arc;
 const RESERVE_CAPACITY_TO_INSERT_OPERATIONS: usize = 5;
 
+/// Doc, main struct to store each token and perform operations on them
 pub struct Doc {
     tokens: Vec<TokenHandler>,
     changed_count: usize,
@@ -27,6 +28,9 @@ impl Doc {
         }
     }
 
+    /// Split input string to vector of different tokens
+    ///
+    /// If it alphanumeric -> WordToken, if it's space -> SpaceToken, else SpecSymbolToken
     fn tokenize(text: &String) -> Vec<TokenHandler> {
         let mut pos: usize = 0;
         let mut res: Vec<TokenHandler> =
@@ -59,6 +63,7 @@ impl Doc {
         res
     }
 
+    /// Create string from tokens
     fn concatenate_tokens(vec_tokens: Vec<&Token>) -> String {
         let total_tokens_len = vec_tokens.iter().map(|t| t.byte_len()).sum();
         let mut concated_str = String::with_capacity(total_tokens_len);
@@ -68,13 +73,17 @@ impl Doc {
         concated_str
     }
 
-    pub fn get_word_tokens(&mut self, include_special_char: bool) -> Vec<&mut TokenHandler> {
+    /// Filter and get only WordTokens with their original indexes
+    pub fn get_word_tokens_with_indexes(
+        &mut self,
+        include_special_char: bool,
+    ) -> Vec<(usize, &mut TokenHandler)> {
         let mut word_tokens = Vec::with_capacity(self.tokens.len());
-        for token in self.tokens.iter_mut() {
+        for (idx, token) in self.tokens.iter_mut().enumerate() {
             let token_type = token.get_original().kind();
             match (token_type, include_special_char) {
-                (TokenType::WordToken, _) => word_tokens.push(token),
-                (TokenType::SpecSymbolToken, true) => word_tokens.push(token),
+                (TokenType::WordToken, _) => word_tokens.push((idx, token)),
+                (TokenType::SpecSymbolToken, true) => word_tokens.push((idx, token)),
                 (_, _) => (),
             }
         }
@@ -82,6 +91,23 @@ impl Doc {
         word_tokens
     }
 
+    /// Get only WordTokens original indexes
+    pub fn get_word_indexes(&mut self, include_special_char: bool) -> Vec<usize> {
+        self.get_word_tokens_with_indexes(include_special_char)
+            .into_iter()
+            .map(|x| x.0)
+            .collect()
+    }
+
+    /// Swap two tokens by their indexes
+    pub fn perform_swap_by_idx(&mut self, idx_a: usize, idx_b: usize) {
+        let tokens_len = self.tokens.len();
+        if (idx_a < tokens_len) & (idx_b < tokens_len) {
+            self.tokens.swap(idx_a, idx_b)
+        }
+    }
+
+    /// Calculate number of word tokens
     pub fn get_word_tokens_count(&self, include_special_char: bool) -> usize {
         let mut count = 0;
         for token in self.tokens.iter() {
@@ -95,40 +121,32 @@ impl Doc {
         count
     }
 
-    pub fn add_change_in_token_handler(
-        &mut self,
-        token_idx: usize,
-        new_token_str: String,
-        kind_token: Option<TokenType>,
-    ) {
-        let kind = kind_token.unwrap_or(TokenType::WordToken);
-        let handler_op = self.tokens.get_mut(token_idx);
-        if let Some(handler) = handler_op {
-            handler.change(kind, new_token_str);
-            self.changed_count += 1;
-        }
-    }
-
+    /// Get original tokens (before augmentation)
     pub fn get_original_tokens(&self) -> Vec<&Token> {
         self.tokens.iter().map(|ch| ch.get_original()).collect()
     }
 
+    /// Get latest tokens (after augmentation, if it was)
     pub fn get_augmented_tokens(&self) -> Vec<&Token> {
         self.tokens.iter().map(|ch| ch.get_latest()).collect()
     }
 
+    /// Create string from augmented tokens
     pub fn get_augmented_string(&self) -> String {
         Doc::concatenate_tokens(self.get_augmented_tokens())
     }
 
+    /// Get number of changes
     pub fn get_changed_count(&self) -> usize {
         self.changed_count
     }
 
+    /// Set number of changes
     pub fn set_change_count(&mut self, value: usize) -> () {
         self.changed_count = value
     }
 
+    /// Clear all changes
     pub fn set_to_original(&mut self) -> () {
         for token in self.tokens.iter_mut() {
             token.set_to_original();
@@ -168,9 +186,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 3);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 6);
     }
 
@@ -193,9 +211,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 4);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 6);
     }
 
@@ -211,9 +229,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 2);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 2);
     }
 
@@ -229,9 +247,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 2);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 2);
     }
 
@@ -246,9 +264,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 1);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 1);
     }
 
@@ -264,9 +282,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 0);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 3);
     }
 
@@ -282,9 +300,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 0);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 0);
     }
 
@@ -296,9 +314,9 @@ mod tests {
 
         let mut doc = Doc::new(&input_str);
         assert_eq!(doc.tokens, expected_handlers);
-        let word_token_len = doc.get_word_tokens(false).len();
+        let word_token_len = doc.get_word_tokens_with_indexes(false).len();
         assert_eq!(word_token_len, 0);
-        let word_spec_token_len = doc.get_word_tokens(true).len();
+        let word_spec_token_len = doc.get_word_tokens_with_indexes(true).len();
         assert_eq!(word_spec_token_len, 0);
     }
 
@@ -382,22 +400,6 @@ mod tests {
     #[test]
     fn test_dont_add_change_in_token_handler() {
         let doc = Doc::new(&String::from("Test example!"));
-        assert_eq!(doc.changed_count, 0);
-        assert_eq!(doc.get_augmented_string(), String::from("Test example!"))
-    }
-
-    #[test]
-    fn test_add_change_in_token_handler() {
-        let mut doc = Doc::new(&String::from("Test example!"));
-        doc.add_change_in_token_handler(2, String::from("cat"), None);
-        assert_eq!(doc.changed_count, 1);
-        assert_eq!(doc.get_augmented_string(), String::from("Test cat!"))
-    }
-
-    #[test]
-    fn test_add_change_outside_array_in_token_handler() {
-        let mut doc = Doc::new(&String::from("Test example!"));
-        doc.add_change_in_token_handler(7, String::from("cat"), None);
         assert_eq!(doc.changed_count, 0);
         assert_eq!(doc.get_augmented_string(), String::from("Test example!"))
     }

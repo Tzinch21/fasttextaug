@@ -1,5 +1,6 @@
 use super::token::{Token, TokenType};
 
+/// Struct, that stores original version of token & changed version
 #[derive(Debug, PartialEq)]
 pub struct TokenHandler {
     original_token: Token,
@@ -14,6 +15,7 @@ impl TokenHandler {
         }
     }
 
+    /// Set new changed version of this token
     pub fn change(&mut self, kind: TokenType, new_token_str: String) {
         self.changed_token = Some(Token::new(kind, new_token_str));
     }
@@ -29,6 +31,7 @@ impl TokenHandler {
         &self.original_token
     }
 
+    /// If it has any change -> returns latest version, else -> original
     pub fn get_latest(&self) -> &Token {
         if let Some(token) = &self.changed_token {
             return token;
@@ -36,6 +39,7 @@ impl TokenHandler {
         &self.original_token
     }
 
+    /// Clear all changes
     pub fn set_to_original(&mut self) -> () {
         self.changed_token = None
     }

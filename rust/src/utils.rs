@@ -8,6 +8,7 @@ use serde_json::{Map, Value};
 use crate::model::Mapping;
 
 /// Read json from path and put in HashMap
+///
 /// Expected json format String -> Vec<String>
 pub fn read_mapping(
     path: &Path,
@@ -38,7 +39,8 @@ pub fn read_mapping(
 }
 
 pub type MappingSet = HashMap<String, HashSet<String>>;
-/// Only purpose to check vec values not by order
+
+/// Useful function in unit-tests, not necessary in main lib module
 pub fn transform_to_set(mapping: &Mapping) -> MappingSet {
     let mut new_val: MappingSet = MappingSet::with_capacity(mapping.len());
     for (key, val_arr) in mapping {
@@ -47,6 +49,7 @@ pub fn transform_to_set(mapping: &Mapping) -> MappingSet {
     new_val
 }
 
+/// Get lexicographic length from string
 pub fn get_chars_len(input: &str) -> usize {
     let mut counter = 0;
     for _ in input.chars() {
@@ -55,6 +58,9 @@ pub fn get_chars_len(input: &str) -> usize {
     counter
 }
 
+/// Split n to chunks
+///
+/// Used in calculations: how many tasks go into a particular thread
 pub fn split_n_to_chunks(n: usize, num_chunks: usize) -> Vec<usize> {
     let mut result = Vec::with_capacity(num_chunks);
     let on_one_chunk = f64::ceil(n as f64 / num_chunks as f64) as usize;
@@ -71,6 +77,9 @@ pub fn split_n_to_chunks(n: usize, num_chunks: usize) -> Vec<usize> {
     result
 }
 
+/// Split n to chunks
+///
+/// And return chunks as non overlapping index intervals
 pub fn split_to_chunks_indexes(vec_size: usize, num_chunks: usize) -> Vec<(usize, usize)> {
     let mut result = Vec::with_capacity(num_chunks);
     let elems_in_chunk = split_n_to_chunks(vec_size, num_chunks);

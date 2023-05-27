@@ -5,7 +5,7 @@ from functools import partial
 
 import nlpaug.augmenter.char as nac
 
-import fasttextaug as fau
+import fasttextaug.augmenter.char as fac
 
 INPUT_TEXT_SINGLE_STR = (
     "This is the best tasting stevia powder I've tried. "
@@ -29,7 +29,7 @@ if __name__ == "__main__":
             bench_result[str_flags][n_size] = {}
             bench_result[str_flags][n_size]["n_size"] = n_size
 
-            my_lib_aug = fau.character.KeyboardAug(
+            my_lib_aug = fac.KeyboardAug(
                 include_special_char=special_char,
                 include_numeric=numeric,
                 include_upper_case=uppercase,
@@ -51,11 +51,15 @@ if __name__ == "__main__":
                 number=number_exist_lib[idx],
             )
 
-            bench_result[str_flags][n_size]["fasttextaug"] = [i / number_my_lib[idx] for i in my_bench]
+            bench_result[str_flags][n_size]["fasttextaug"] = [
+                i / number_my_lib[idx] for i in my_bench
+            ]
             bench_result[str_flags][n_size]["fasttextaug_repeats"] = REPEATS
             bench_result[str_flags][n_size]["fasttextaug_number"] = number_my_lib[idx]
 
-            bench_result[str_flags][n_size]["nlpaug"] = [i / number_exist_lib[idx] for i in lib_bench]
+            bench_result[str_flags][n_size]["nlpaug"] = [
+                i / number_exist_lib[idx] for i in lib_bench
+            ]
             bench_result[str_flags][n_size]["nlpaug_repeats"] = REPEATS
             bench_result[str_flags][n_size]["nlpaug_number"] = number_exist_lib[idx]
 

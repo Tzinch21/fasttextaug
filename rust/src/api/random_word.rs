@@ -1,70 +1,66 @@
 use super::RustBaseApiClass;
-use crate::aug::character::OcrAugmentor;
-use crate::aug::{AugCountParams, BaseAugmentor};
+use crate::aug::word::RandomWordAugmentor;
+use crate::aug::{Action, AugCountParams, BaseAugmentor};
 use crate::doc::Doc;
-use crate::model::character::OcrModel;
+use crate::model::word::RandomWordModel;
 use pyo3::prelude::*;
 use rand::{rngs::StdRng, SeedableRng};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::thread;
 
-/// Api Class to perform OCR model augmentations on input
+/// Api Class to perform RandomWord model augmentations on input
 #[pyclass]
-pub struct RustOCRApiClass {
-    /// Parameteres to calculate number of chars that will be augmented in single word
-    aug_char_params: AugCountParams,
+pub struct RustRandomWordApiClass {
+    /// Action to augmentation, set of values {'substitute', 'swap', 'delete'}
+    action: Action,
     /// Parameteres to calculate number of words that will be augmented
     aug_word_params: AugCountParams,
-    /// OcrModel
-    model: Arc<OcrModel>,
+    /// RandomWordModel
+    model: Arc<RandomWordModel>,
     /// Filter, Set of words that cannot be augmented
     stopwords: Arc<Option<HashSet<String>>>,
-    /// Filter, do not augment word, if it's lenght less than this value
-    min_char: Option<usize>,
 }
 
-impl RustOCRApiClass {
-    fn get_aug_char_params(&self) -> AugCountParams {
-        self.aug_char_params.clone()
-    }
-
+impl RustRandomWordApiClass {
     fn get_aug_word_params(&self) -> AugCountParams {
         self.aug_word_params.clone()
-    }
-
-    fn get_min_chars(&self) -> Option<usize> {
-        self.min_char
     }
 }
 
 #[pymethods]
-impl RustOCRApiClass {
+impl RustRandomWordApiClass {
     #[new]
     #[pyo3(signature = (
-        aug_min_char, aug_max_char, aug_p_char,
-        aug_min_word, aug_max_word, aug_p_word,
-        stopwords, min_char, dict_of_path)
+        action, aug_min_word, aug_max_word, aug_p_word,
+        stopwords, target_vec_words, target_map_words)
     )]
     fn new(
-        aug_min_char: Option<usize>,
-        aug_max_char: Option<usize>,
-        aug_p_char: Option<f32>,
+        action: String,
         aug_min_word: Option<usize>,
         aug_max_word: Option<usize>,
         aug_p_word: Option<f32>,
         stopwords: Option<HashSet<String>>,
-        min_char: Option<usize>,
-        dict_of_path: String,
+        target_vec_words: Option<Vec<String>>,
+        target_map_words: Option<HashMap<String, Vec<String>>>,
     ) -> Self {
-        let mut model = OcrModel::new(dict_of_path);
+        let model = match (target_vec_words, target_map_words) {
+            (Some(target), _) => RandomWordModel::from_vec(target),
+            (None, Some(target)) => RandomWordModel::from_map(target),
+            (None, None) => RandomWordModel::empty_model(),
+        };
         model.load_model();
-        RustOCRApiClass {
-            aug_char_params: AugCountParams::new(aug_min_char, aug_max_char, aug_p_char),
+        let action = match &action[..] {
+            "substitute" => Action::Substitute,
+            "delete" => Action::Delete,
+            "swap" => Action::Swap,
+            _ => Action::Substitute,
+        };
+        RustRandomWordApiClass {
+            action: action,
             aug_word_params: AugCountParams::new(aug_min_word, aug_max_word, aug_p_word),
             model: Arc::new(model),
             stopwords: Arc::new(stopwords),
-            min_char: min_char,
         }
     }
 
@@ -90,12 +86,11 @@ impl RustOCRApiClass {
     }
 }
 
-impl RustBaseApiClass<OcrAugmentor, OcrModel> for RustOCRApiClass {
-    fn create_augmentor_instance(&self) -> OcrAugmentor {
-        OcrAugmentor::new(
-            self.get_aug_char_params(),
+impl RustBaseApiClass<RandomWordAugmentor, RandomWordModel> for RustRandomWordApiClass {
+    fn create_augmentor_instance(&self) -> RandomWordAugmentor {
+        RandomWordAugmentor::new(
+            self.action,
             self.get_aug_word_params(),
-            self.get_min_chars(),
             Arc::clone(&self.model),
             Arc::clone(&self.stopwords),
         )
@@ -106,9 +101,8 @@ impl RustBaseApiClass<OcrAugmentor, OcrModel> for RustOCRApiClass {
         input_string_ref: Arc<String>,
         n_on_thread: usize,
     ) -> thread::JoinHandle<Vec<String>> {
-        let aug_params_char_cloned = self.get_aug_char_params();
+        let action_cloned = self.action.clone();
         let aug_params_word_cloned = self.get_aug_word_params();
-        let min_chars_cloned = self.get_min_chars();
         let arc_model_ref = Arc::clone(&self.model);
         let arc_stopword_ref = Arc::clone(&self.stopwords);
 
@@ -116,10 +110,9 @@ impl RustBaseApiClass<OcrAugmentor, OcrModel> for RustOCRApiClass {
             let mut rng: StdRng = SeedableRng::from_entropy();
             let mut thread_res = Vec::with_capacity(n_on_thread);
             let mut doc = Doc::from_arc(input_string_ref);
-            let augmentor = OcrAugmentor::new(
-                aug_params_char_cloned,
+            let augmentor = RandomWordAugmentor::new(
+                action_cloned,
                 aug_params_word_cloned,
-                min_chars_cloned,
                 arc_model_ref,
                 arc_stopword_ref,
             );
@@ -139,28 +132,27 @@ impl RustBaseApiClass<OcrAugmentor, OcrModel> for RustOCRApiClass {
         left_idx: usize,
         right_idx: usize,
     ) -> thread::JoinHandle<Vec<String>> {
-        let aug_params_char_cloned = self.get_aug_char_params();
+        let action_cloned = self.action.clone();
         let aug_params_word_cloned = self.get_aug_word_params();
-        let min_chars_cloned = self.get_min_chars();
         let arc_model_ref = Arc::clone(&self.model);
         let arc_stopword_ref = Arc::clone(&self.stopwords);
 
         let thread_handle = thread::spawn(move || {
             let mut rng: StdRng = SeedableRng::from_entropy();
             let mut thread_res = Vec::with_capacity(right_idx - left_idx);
-            let augmentor = OcrAugmentor::new(
-                aug_params_char_cloned,
+            let augmentor = RandomWordAugmentor::new(
+                action_cloned,
                 aug_params_word_cloned,
-                min_chars_cloned,
                 arc_model_ref,
                 arc_stopword_ref,
             );
-
+            // [left_idx..right_idx]
             for input in &input_list_ref.as_ref()[left_idx..right_idx] {
                 let mut doc = Doc::new(input);
                 augmentor.augment(&mut doc, &mut rng);
                 thread_res.push(doc.get_augmented_string());
             }
+
             thread_res
         });
         thread_handle

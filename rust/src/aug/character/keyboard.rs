@@ -4,12 +4,19 @@ use crate::model::character::KeyboardModel;
 use std::collections::HashSet;
 use std::sync::Arc;
 
+/// Augmentor, which performs KeyboardModel on text
 pub struct KeyboardAugmentor {
+    /// Parameteres to calculate number of chars that will be augmented in single word
     aug_params_char: AugCountParams,
+    /// Parameteres to calculate number of words that will be augmented
     aug_params_word: AugCountParams,
+    /// Filter, do not augment word, if it's lenght less than this value
     min_chars: Option<usize>,
+    /// KeyboardModel
     model: Arc<KeyboardModel>,
+    /// Filter, Set of words that cannot be augmented
     stopwords: Arc<Option<HashSet<String>>>,
+    /// Flag, if it's true then we can augment special_chars
     use_special_chars: bool,
 }
 

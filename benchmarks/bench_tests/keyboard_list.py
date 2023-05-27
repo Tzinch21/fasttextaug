@@ -6,7 +6,7 @@ from functools import partial
 import pandas as pd
 import nlpaug.augmenter.char as nac
 
-import fasttextaug as fau
+import fasttextaug.augmenter.char as fac
 
 data = pd.read_csv("/app/data/Reviews.csv")
 REVIEWS = data.iloc[:, -1].to_list()
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         bench_result[str_flags] = {}
         special_char, numeric, uppercase = flags
 
-        my_lib_aug = fau.character.KeyboardAug(
+        my_lib_aug = fac.KeyboardAug(
             include_special_char=special_char, include_numeric=numeric, include_upper_case=uppercase
         )
         exist_lib_aug = nac.KeyboardAug(

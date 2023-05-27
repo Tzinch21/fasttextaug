@@ -4,19 +4,26 @@ use super::super::{BaseModel, Mapping};
 use super::CharacterModel;
 use crate::utils;
 
+/// Keyboard model - emulates user typos
 pub struct KeyboardModel {
+    /// Allow special char to be augmented '%' -> ['5', 'r', 't', ...]
     allow_special_char: bool,
+    /// Allow numeric char to be augmented
     allow_numeric: bool,
+    /// Allow changes from lowercase to uppercase, and vice verca
     upper_case: bool,
+    /// Path on your system to load json-file model
     model_path: String,
+    /// Mapping
     model: Option<Mapping>,
 }
 
 impl KeyboardModel {
     /// Check for conditions, if char met them, then include char to mapping model
-    /// if spec_char not allowed and it's special char (not alphanumeric) -> return false
-    /// if numeric not allowd and it's numeric -> return false
-    /// if any condition is false -> return false
+    ///
+    /// - if spec_char not allowed and it's special char (not alphanumeric) -> return false
+    /// - if numeric not allowed and it's numeric -> return false
+    /// - if any condition is false -> return false
     fn check_conditions(&self, input: &str) -> bool {
         let character = input.chars().next().unwrap();
         let spec_char_cond_met = self.allow_special_char | character.is_alphanumeric();
@@ -44,6 +51,7 @@ impl KeyboardModel {
         model
     }
 
+    /// Lazy-file read, before this method executed -> Model = None
     pub fn load_model(&mut self) {
         if let Some(_) = self.model {
             return;

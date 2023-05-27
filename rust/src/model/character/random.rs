@@ -1,19 +1,28 @@
 use super::super::{BaseModel, Mapping};
 use super::CharacterModel;
 
+/// Supported chars sequences
 enum SupportedLanguage {
     EN,
     RU,
     Unknown,
 }
 
+/// Random char augmentations model
 pub struct RandomCharModel {
+    /// Allow uppercase chars to be in augments
     include_upper_case: bool,
+    /// Allow lowercase chars to be in augments
     include_lower_case: bool,
+    /// Allow special char to be in augments
     include_special_char: bool,
+    /// Allow numeric char to be in augments
     include_numeric: bool,
+    /// Supported language
     lang: SupportedLanguage,
+    /// Your own String of special_chars to include
     spec_char: Option<String>,
+    /// You own Vector of chars to use in model
     candidates: Option<Vec<String>>,
 }
 
@@ -44,6 +53,9 @@ impl RandomCharModel {
         model
     }
 
+    /// Instead using flag and lang, it's possible to directly pass vec of chars  to use
+    ///
+    /// String instead of char, because utf-16 symbols need more space to store
     pub fn from_candidates(candidates: Vec<String>) -> Self {
         Self {
             include_upper_case: false,
@@ -63,6 +75,7 @@ impl RandomCharModel {
         String::from("!@#$%^&*()_+")
     }
 
+    /// Lazy-file read, before this method executed -> Model = None
     pub fn load_model(&mut self) {
         if let Some(_) = self.candidates {
             return;
@@ -106,6 +119,7 @@ impl BaseModel for RandomCharModel {
         (0, 0, Vec::new())
     }
 
+    /// Every key exists, because we may replace it with every our char from candidates
     fn key_exists(&self, _: &str) -> bool {
         true
     }

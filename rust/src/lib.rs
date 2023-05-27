@@ -8,8 +8,9 @@ use pyo3::prelude::*;
 
 #[pymodule]
 fn rust_fasttextaug(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<api::ocr::RustOCRAugmentor>()?;
-    m.add_class::<api::keyboard::RustKeyboardAugmentor>()?;
-    m.add_class::<api::random_char::RustRandomCharAugmentor>()?;
+    m.add_class::<api::RustOCRApiClass>()?;
+    m.add_class::<api::RustKeyboardApiClass>()?;
+    m.add_class::<api::RustRandomCharApiClass>()?;
+    m.add_class::<api::RustRandomWordApiClass>()?;
     Ok(())
 }

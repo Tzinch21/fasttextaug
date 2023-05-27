@@ -8,19 +8,31 @@ use rand::rngs::StdRng;
 use std::collections::HashSet;
 use std::sync::Arc;
 
+/// Different swap strategies
 enum SwapMode {
+    /// Swap char with it's neigbour
     Adjacent,
+    /// Swap char with any in word, except start & end
     Middle,
+    /// Swap char with with any in word
     Random,
 }
 
+/// Augmentor, which performs RandomCharModel on text
 pub struct RandomCharAugmentor {
+    /// Action to augmentation, set of values {'substitute', 'insert', 'swap', 'delete'}
     action: Action,
+    /// Parameteres to calculate number of chars that will be augmented in single word
     aug_params_char: AugCountParams,
+    /// Parameteres to calculate number of words that will be augmented
     aug_params_word: AugCountParams,
+    /// Filter, do not augment word, if it's lenght less than this value
     min_chars: Option<usize>,
+    /// RandomCharModel
     model: Arc<RandomCharModel>,
+    /// Filter, Set of words that cannot be augmented
     stopwords: Arc<Option<HashSet<String>>>,
+    /// Choosen swap strategy
     swapmode: SwapMode,
 }
 
@@ -51,6 +63,9 @@ impl RandomCharAugmentor {
         }
     }
 
+    /// Closure performed for each character in the word
+    /// to make predictions for characters that are sampled
+    /// and insert new char
     fn insert_predicted_char(
         &self,
         idx: usize,
@@ -73,10 +88,11 @@ impl RandomCharAugmentor {
         ch_str
     }
 
+    /// Action::Insert augmentation
     fn insert(&self, doc: &mut Doc, rng: &mut StdRng) {
         let aug_tokens = self.sample_word_tokens_to_aug(doc, rng);
         let mut change_seq = 0;
-        for a_token in aug_tokens {
+        for (_, a_token) in aug_tokens {
             let original_token = a_token.get_original();
             let aug_chars_indexes = self.sample_chars_to_aug(original_token, rng);
             if aug_chars_indexes.len() == 0 {
@@ -96,10 +112,11 @@ impl RandomCharAugmentor {
         doc.set_change_count(change_seq);
     }
 
+    /// Action::Delete augmentation
     fn delete(&self, doc: &mut Doc, rng: &mut StdRng) {
         let aug_tokens = self.sample_word_tokens_to_aug(doc, rng);
         let mut change_seq = 0;
-        for a_token in aug_tokens {
+        for (_, a_token) in aug_tokens {
             let original_token = a_token.get_original();
             let aug_chars_indexes = self.sample_chars_to_aug(original_token, rng);
             if aug_chars_indexes.len() == 0 {
@@ -124,6 +141,7 @@ impl RandomCharAugmentor {
         doc.set_change_count(change_seq);
     }
 
+    /// Implementation of different swap strategies
     fn get_swap_position(&self, pos: usize, token_length: usize, rng: &mut StdRng) -> usize {
         let new_pos: usize;
         match self.swapmode {
@@ -170,10 +188,11 @@ impl RandomCharAugmentor {
         }
     }
 
+    /// Action::Swap augmentation with saving uppercase/lowercase
     fn swap(&self, doc: &mut Doc, rng: &mut StdRng) {
         let aug_tokens = self.sample_word_tokens_to_aug(doc, rng);
         let mut change_seq = 0;
-        for a_token in aug_tokens {
+        for (_, a_token) in aug_tokens {
             let original_token = a_token.get_original();
             if a_token.get_original().utf8_len() < 2 {
                 continue;

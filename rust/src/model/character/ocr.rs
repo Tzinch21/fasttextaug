@@ -3,8 +3,11 @@ use super::CharacterModel;
 use crate::utils;
 use std::path::Path;
 
+/// Ocr model - emulates ocr error, like 'l' <--> '1'
 pub struct OcrModel {
+    /// Path on your system to load json-file model
     model_path: String,
+    /// Mapping
     model: Option<Mapping>,
 }
 
@@ -56,6 +59,7 @@ impl OcrModel {
         }
     }
 
+    /// Lazy-file read, before this method executed -> Model = None
     pub fn load_model(&mut self) {
         if let Some(_) = self.model {
             return;

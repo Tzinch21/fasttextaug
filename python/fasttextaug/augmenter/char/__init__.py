@@ -1,3 +1,3 @@
 from .ocr import OcrAug
-from .random import RandomCharAug
 from .keyboard import KeyboardAug
+from .random_char import RandomCharAug

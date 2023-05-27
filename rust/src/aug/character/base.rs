@@ -5,12 +5,16 @@ use rand::prelude::IteratorRandom;
 use rand::rngs::StdRng;
 use std::collections::HashSet;
 
+/// Base character augmentors functionality
 pub trait CharacterAugmentor<T>: BaseAugmentor<T>
 where
     T: CharacterModel,
 {
     fn get_aug_params_char(&self) -> &AugCountParams;
 
+    /// Create sample of chars to augmentation from chosen word
+    ///
+    /// Before sampling, we check if the symbol exists in the model
     fn sample_chars_to_aug(&self, token: &Token, rng: &mut StdRng) -> HashSet<usize> {
         let mut char_indexes: Vec<usize> = Vec::with_capacity(token.utf8_len());
         let aug_cnt = self
@@ -34,6 +38,8 @@ where
         HashSet::from_iter(sampled)
     }
 
+    /// Closure performed for each character in the word
+    /// to make predictions for characters that are sampled
     fn predict_char(
         &self,
         idx: usize,
@@ -54,10 +60,11 @@ where
         ch_str
     }
 
+    /// Default substitute method to char models
     fn substitute(&self, doc: &mut Doc, rng: &mut StdRng) -> () {
         let aug_tokens = self.sample_word_tokens_to_aug(doc, rng);
         let mut change_seq = 0;
-        for a_token in aug_tokens {
+        for (_, a_token) in aug_tokens {
             let original_token = a_token.get_original();
             let aug_chars_indexes = self.sample_chars_to_aug(original_token, rng);
             if aug_chars_indexes.len() == 0 {
@@ -129,12 +136,13 @@ mod tests {
     }
     impl CharacterModel for MockModel {}
 
-    struct MockAugmentor {
+    struct MockAugmentor<'a> {
         aug_params_char: AugCountParams,
         aug_params_word: AugCountParams,
         model: MockModel,
+        stopwords: Option<&'a HashSet<String>>,
     }
-    impl BaseAugmentor<MockModel> for MockAugmentor {
+    impl<'a> BaseAugmentor<MockModel> for MockAugmentor<'a> {
         fn augment(&self, _: &mut Doc, _: &mut StdRng) -> () {}
         fn get_action(&self) -> Action {
             Action::Substitute
@@ -147,10 +155,10 @@ mod tests {
             &self.model
         }
         fn get_stopwords(&self) -> Option<&HashSet<String>> {
-            None
+            self.stopwords
         }
     }
-    impl CharacterAugmentor<MockModel> for MockAugmentor {
+    impl<'a> CharacterAugmentor<MockModel> for MockAugmentor<'a> {
         fn get_aug_params_char(&self) -> &AugCountParams {
             &self.aug_params_char
         }
@@ -163,6 +171,7 @@ mod tests {
             aug_params_char: AugCountParams::new(Some(1), Some(5), Some(0.5)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("Qvqv"));
@@ -177,6 +186,7 @@ mod tests {
             aug_params_char: AugCountParams::new(Some(3), Some(7), Some(0.4)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("агсагсагс"));
@@ -192,6 +202,7 @@ mod tests {
             aug_params_char: AugCountParams::new(Some(1), Some(10), Some(0.8)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("vavava"));
@@ -208,6 +219,7 @@ mod tests {
             aug_params_char: AugCountParams::new(Some(3), Some(7), Some(0.8)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("Авиастроение"));
@@ -222,6 +234,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, Some(0.0)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("vavava"));
@@ -236,6 +249,7 @@ mod tests {
             aug_params_char: AugCountParams::new(Some(1), Some(3), Some(0.3)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("none"));
@@ -250,6 +264,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, Some(0.0)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("агс"));
@@ -264,6 +279,7 @@ mod tests {
             aug_params_char: AugCountParams::new(Some(1), Some(3), Some(0.3)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let mut rng: StdRng = SeedableRng::from_entropy();
         let token = Token::new(TokenType::WordToken, String::from("ноль"));
@@ -278,6 +294,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, None),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
         let mut rng: StdRng = SeedableRng::from_entropy();
@@ -292,6 +309,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, None),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
         let mut rng: StdRng = SeedableRng::from_entropy();
@@ -306,6 +324,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, None),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
         let mut rng: StdRng = SeedableRng::from_entropy();
@@ -320,6 +339,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, None),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let char_idxs: HashSet<usize> = HashSet::from([2, 3]);
         let mut rng: StdRng = SeedableRng::from_entropy();
@@ -334,6 +354,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, None),
             aug_params_word: AugCountParams::new(None, None, Some(0.0)),
             model: model,
+            stopwords: None,
         };
         let input_string = String::from("Пример строки для аугментации");
         let mut doc = Doc::new(&input_string);
@@ -350,6 +371,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, Some(0.0)),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let input_string = String::from("Пример строки для аугментации");
         let mut doc = Doc::new(&input_string);
@@ -366,6 +388,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, None),
             aug_params_word: AugCountParams::new(None, None, None),
             model: model,
+            stopwords: None,
         };
         let input_string = String::from("Пример ещё один");
         let mut doc = Doc::new(&input_string);
@@ -382,6 +405,7 @@ mod tests {
             aug_params_char: AugCountParams::new(None, None, None),
             aug_params_word: AugCountParams::new(Some(2), None, None),
             model: model,
+            stopwords: None,
         };
         let input_string = String::from("Апельсин гора стакан");
         let mut doc = Doc::new(&input_string);

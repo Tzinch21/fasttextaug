@@ -1,8 +1,11 @@
 use std::collections::{HashMap, HashSet};
 
+/// Most common model type - Mapping from String to Vector of Strings
 pub type Mapping = HashMap<String, Vec<String>>;
 
+/// Base models functionality
 pub trait BaseModel {
+    /// Get mapping inside model
     fn get_mapping(&self) -> Option<&Mapping>;
 
     /// Get model stats (len, capacity, Vec<len, capacity> for each array)
@@ -19,6 +22,7 @@ pub trait BaseModel {
         }
     }
 
+    /// Check if key exists in model (If we can call predict method)
     fn key_exists(&self, data: &str) -> bool {
         if let Some(model) = self.get_mapping() {
             return model.contains_key(data);
@@ -26,6 +30,7 @@ pub trait BaseModel {
         false
     }
 
+    /// Return model prediction from given input
     fn predict(&self, data: &str) -> Option<&Vec<String>> {
         if let Some(model) = self.get_mapping() {
             return model.get(data);
@@ -33,6 +38,8 @@ pub trait BaseModel {
         None
     }
 
+    /// Useful function, if someone pass duplicated keys/values to model
+    ///  we can deduplicate it and use
     fn deduplicate(mapping: Mapping) -> Mapping {
         let mut new_mapping = Mapping::with_capacity(mapping.capacity());
         for (key, value) in mapping {

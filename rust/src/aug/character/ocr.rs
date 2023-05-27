@@ -4,11 +4,17 @@ use crate::model::character::OcrModel;
 use std::collections::HashSet;
 use std::sync::Arc;
 
+/// Augmentor, which performs OcrModel on text
 pub struct OcrAugmentor {
+    /// Parameteres to calculate number of chars that will be augmented in single word
     aug_params_char: AugCountParams,
+    /// Parameteres to calculate number of words that will be augmented
     aug_params_word: AugCountParams,
+    /// Filter, do not augment word, if it's lenght less than this value
     min_chars: Option<usize>,
+    /// OcrModel
     model: Arc<OcrModel>,
+    /// Filter, Set of words that cannot be augmented
     stopwords: Arc<Option<HashSet<String>>>,
 }
 

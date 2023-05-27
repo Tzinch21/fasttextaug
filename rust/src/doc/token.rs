@@ -1,5 +1,10 @@
 use crate::utils;
 
+/// Three token types
+///
+/// WordToken -> for every continuous sequence of alphanumeric chars
+/// SpaceToken -> Any Space token
+/// Non Space & non alphanumeric chars, like #$~, etc. (Useful for Keyboard Model)
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
     WordToken,
@@ -7,6 +12,9 @@ pub enum TokenType {
     SpaceToken,
 }
 
+/// Struct that stores token, it's type and it's lexicographic length
+///
+/// For example, Russian 'ф' - not one utf-8 char -> it takes 2 bytes
 #[derive(Debug, PartialEq)]
 pub struct Token {
     kind: TokenType,
@@ -32,10 +40,12 @@ impl Token {
         &self.token
     }
 
+    /// Get lexicographic length
     pub fn utf8_len(&self) -> usize {
         self.token_len
     }
 
+    /// Get bytes lenght
     pub fn byte_len(&self) -> usize {
         self.token.len()
     }

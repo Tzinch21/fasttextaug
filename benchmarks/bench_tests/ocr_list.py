@@ -5,7 +5,7 @@ from functools import partial
 import pandas as pd
 import nlpaug.augmenter.char as nac
 
-import fasttextaug as fau
+import fasttextaug.augmenter.char as fac
 
 data = pd.read_csv("/app/data/Reviews.csv")
 REVIEWS = data.iloc[:, -1].to_list()
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     NUMBER_MY_LIB = 10
     NUMBER_THEIR_LIB = 1
 
-    my_lib_ocr_aug = fau.character.OcrAug()
+    my_lib_ocr_aug = fac.OcrAug()
     exist_lib_ocr_aug = nac.OcrAug()
 
     for num_thread in (1, 2, 4, 8):

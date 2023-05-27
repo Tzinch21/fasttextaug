@@ -3,9 +3,9 @@ import timeit
 from functools import partial
 
 import pandas as pd
-import nlpaug.augmenter.char as nac
+import nlpaug.augmenter.word as naw
 
-import fasttextaug.augmenter.char as fac
+import fasttextaug.augmenter.word as faw
 
 data = pd.read_csv("/app/data/Reviews.csv")
 REVIEWS = data.iloc[:, -1].to_list()
@@ -17,11 +17,11 @@ if __name__ == "__main__":
     NUMBER_MY_LIB = 7
     NUMBER_THEIR_LIB = 3
 
-    for action in ["insert", "substitute", "swap", "delete"]:
+    for action in ["substitute", "swap", "delete"]:
         bench_result[action] = {}
 
-        my_lib_aug = fac.RandomCharAug(action=action)
-        exist_lib_aug = nac.RandomCharAug(action=action)
+        my_lib_aug = faw.RandomWordAug(action=action)
+        exist_lib_aug = naw.RandomWordAug(action=action)
 
         for num_thread in (1, 2, 4, 8):
             bench_result[action][num_thread] = {}
@@ -46,5 +46,5 @@ if __name__ == "__main__":
                 bench_result[action][num_thread]["nlpaug_number"] = NUMBER_THEIR_LIB
                 bench_result[action][num_thread]["nlpaug_repeats"] = REPEATS
 
-    with open("/reports/random_char/random_char_list.json", "w") as file:
+    with open("/reports/random_word/random_word_list.json", "w") as file:
         print(json.dumps(bench_result), file=file)
