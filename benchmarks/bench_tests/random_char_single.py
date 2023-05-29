@@ -15,13 +15,13 @@ INPUT_TEXT_SINGLE_STR = (
 if __name__ == "__main__":
     bench_result = {}
     REPEATS = 3
-    number_my_lib = (10_000, 100_00, 1000, 100, 100)
-    number_exist_lib = (1000, 100, 100, 10, 10)
+    number_my_lib = (10_000, 10_000, 10_000, 10_000, 100_00, 1000, 100, 100)
+    number_exist_lib = (1000, 1000, 1000, 1000, 100, 100, 10, 10)
 
     for action in ["insert", "substitute", "swap", "delete"]:
         bench_result[action] = {}
 
-        for idx, n_size in enumerate((1, 10, 100, 1_000, 10_000)):
+        for idx, n_size in enumerate((1, 2, 3, 5, 10, 100, 1_000, 10_000)):
             bench_result[action][n_size] = {}
             bench_result[action][n_size]["n_size"] = n_size
 

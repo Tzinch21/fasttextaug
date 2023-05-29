@@ -16,10 +16,10 @@ INPUT_TEXT_SINGLE_STR = (
 if __name__ == "__main__":
     bench_result = {}
     REPEATS = 5
-    number_my_lib = (100_000, 100_000, 10_000, 1000, 100)
-    number_exist_lib = (10_000, 1000, 100, 100, 100)
+    number_my_lib = (100_000, 100_000, 100_000, 100_000, 100_000, 10_000, 1000, 100)
+    number_exist_lib = (10_000, 10_000, 10_000, 10_000, 1000, 100, 100, 100)
 
-    for idx, n_size in enumerate((1, 10, 100, 1_000, 10_000)):
+    for idx, n_size in enumerate((1, 2, 3, 5, 10, 100, 1_000, 10_000)):
         bench_result[n_size] = {}
         bench_result[n_size]["n_size"] = n_size
 
