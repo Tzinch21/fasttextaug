@@ -8,7 +8,7 @@ use crate::doc::TokenType;
 use crate::model::word::RandomWordModel;
 use crate::model::BaseModel;
 use rand::rngs::StdRng;
-use rand::seq::IteratorRandom;
+use rand::seq::{IteratorRandom, SliceRandom};
 
 /// Augmentor, which performs RandomWordModel on text
 pub struct RandomWordAugmentor {
@@ -74,7 +74,12 @@ impl RandomWordAugmentor {
     }
 
     /// Swap strategy for words
-    fn get_swap_position(&self, pos: usize, possible_indexes: &Vec<usize>) -> Option<usize> {
+    fn get_swap_position(
+        &self,
+        pos: usize,
+        possible_indexes: &Vec<usize>,
+        rng: &mut StdRng,
+    ) -> Option<usize> {
         if possible_indexes.len() < 2 {
             return None;
         }
@@ -85,11 +90,10 @@ impl RandomWordAugmentor {
             } else if pos_idx == possible_indexes.len() - 1 {
                 return Some(possible_indexes[pos_idx - 1]);
             } else {
-                if rand::random() {
-                    return Some(possible_indexes[pos_idx + 1]);
-                } else {
-                    return Some(possible_indexes[pos_idx - 1]);
-                }
+                let variants: [i32; 2] = [-1, 1];
+                let value = variants.choose(rng).unwrap();
+                let new_idx = (pos_idx as i32 + *value) as usize;
+                return Some(possible_indexes[new_idx]);
             }
         }
         None
@@ -102,7 +106,7 @@ impl RandomWordAugmentor {
         let mut change_seq = 0;
         let mut swap_pairs = Vec::with_capacity(aug_tokens.len());
         for (idx, _) in aug_tokens {
-            let swap_position = self.get_swap_position(idx, &word_token_indexes);
+            let swap_position = self.get_swap_position(idx, &word_token_indexes, rng);
             if let Some(swap_pos) = swap_position {
                 swap_pairs.push((idx, swap_pos));
             }

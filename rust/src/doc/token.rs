@@ -5,7 +5,7 @@ use crate::utils;
 /// WordToken -> for every continuous sequence of alphanumeric chars
 /// SpaceToken -> Any Space token
 /// Non Space & non alphanumeric chars, like #$~, etc. (Useful for Keyboard Model)
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TokenType {
     WordToken,
     SpecSymbolToken,

@@ -103,7 +103,14 @@ impl Doc {
     pub fn perform_swap_by_idx(&mut self, idx_a: usize, idx_b: usize) {
         let tokens_len = self.tokens.len();
         if (idx_a < tokens_len) & (idx_b < tokens_len) {
-            self.tokens.swap(idx_a, idx_b)
+            let a_token_kind = self.tokens.get(idx_a).unwrap().get_latest().kind().clone();
+            let a_token = self.tokens.get(idx_a).unwrap().get_latest().token().clone();
+            let b_token_kind = self.tokens.get(idx_b).unwrap().get_latest().kind().clone();
+            let b_token = self.tokens.get(idx_b).unwrap().get_latest().token().clone();
+            let a_token_handler = self.tokens.get_mut(idx_a).unwrap();
+            a_token_handler.change(b_token_kind, b_token);
+            let b_token_handler = self.tokens.get_mut(idx_b).unwrap();
+            b_token_handler.change(a_token_kind, a_token);
         }
     }
 
